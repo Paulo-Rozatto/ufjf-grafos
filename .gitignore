@@ -3,3 +3,5 @@ ufjf-grafos-2020-3
 *.depend
 .vscode
 main
+*.exe
+*.layout
