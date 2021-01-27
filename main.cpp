@@ -33,7 +33,10 @@ Graph *leitura(ifstream &input_file, int directed, int weightedEdge, int weighte
 
         while (input_file >> idNodeSource >> idNodeTarget)
         {
-
+            if (!graph->searchNode(idNodeSource))
+                graph->insertNode(idNodeSource);
+            if (!graph->searchNode(idNodeTarget))
+                graph->insertNode(idNodeTarget);
             graph->insertEdge(idNodeSource, idNodeTarget, 0);
         }
     }
@@ -44,7 +47,10 @@ Graph *leitura(ifstream &input_file, int directed, int weightedEdge, int weighte
 
         while (input_file >> idNodeSource >> idNodeTarget >> edgeWeight)
         {
-
+            if (!graph->searchNode(idNodeSource))
+                graph->insertNode(idNodeSource);
+            if (!graph->searchNode(idNodeTarget))
+                graph->insertNode(idNodeTarget);
             graph->insertEdge(idNodeSource, idNodeTarget, edgeWeight);
         }
     }
@@ -55,7 +61,10 @@ Graph *leitura(ifstream &input_file, int directed, int weightedEdge, int weighte
 
         while (input_file >> idNodeSource >> nodeSourceWeight >> idNodeTarget >> nodeTargetWeight)
         {
-
+            if (!graph->searchNode(idNodeSource))
+                graph->insertNode(idNodeSource);
+            if (!graph->searchNode(idNodeTarget))
+                graph->insertNode(idNodeTarget);
             graph->insertEdge(idNodeSource, idNodeTarget, 0);
             graph->getNode(idNodeSource)->setWeight(nodeSourceWeight);
             graph->getNode(idNodeTarget)->setWeight(nodeTargetWeight);
@@ -66,9 +75,12 @@ Graph *leitura(ifstream &input_file, int directed, int weightedEdge, int weighte
 
         float nodeSourceWeight, nodeTargetWeight, edgeWeight;
 
-        while (input_file >> idNodeSource >> nodeSourceWeight >> idNodeTarget >> nodeTargetWeight)
+        while (input_file >> idNodeSource >> nodeSourceWeight >> idNodeTarget >> nodeTargetWeight >> edgeWeight)
         {
-
+            if (!graph->searchNode(idNodeSource))
+                graph->insertNode(idNodeSource);
+            if (!graph->searchNode(idNodeTarget))
+                graph->insertNode(idNodeTarget);
             graph->insertEdge(idNodeSource, idNodeTarget, edgeWeight);
             graph->getNode(idNodeSource)->setWeight(nodeSourceWeight);
             graph->getNode(idNodeTarget)->setWeight(nodeTargetWeight);
@@ -96,7 +108,10 @@ Graph *leituraInstancia(ifstream &input_file, int directed, int weightedEdge, in
     //Leitura de arquivo
     while (input_file >> idNodeSource >> idNodeTarget)
     {
-
+        if (!graph->searchNode(idNodeSource))
+            graph->insertNode(idNodeSource);
+        if (!graph->searchNode(idNodeTarget))
+            graph->insertNode(idNodeTarget);
         graph->insertEdge(idNodeSource, idNodeTarget, 0);
     }
 
@@ -179,6 +194,11 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
 
         break;
     }
+    case 0:
+    {
+        cout << "Execution finished" << endl;
+        break;
+    }
     default:
     {
         cout << " Error!!! invalid option!!" << endl;
@@ -193,7 +213,7 @@ int mainMenu(ofstream &output_file, Graph *graph)
 
     while (selecao != 0)
     {
-        system("clear");
+        // system("clear");
         selecao = menu();
 
         if (output_file.is_open())
@@ -240,7 +260,7 @@ int main(int argc, char const *argv[])
     if (input_file.is_open())
     {
 
-        graph = leituraInstancia(input_file, atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
+        graph = leitura(input_file, atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
     }
     else
         cout << "Unable to open " << argv[1];

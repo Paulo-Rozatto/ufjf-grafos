@@ -1,4 +1,5 @@
 obj/
+bin/
 ufjf-grafos-2020-3
 *.depend
 .vscode

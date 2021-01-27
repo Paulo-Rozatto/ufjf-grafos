@@ -96,10 +96,49 @@ Node *Graph::getLastNode()
 */
 void Graph::insertNode(int id)
 {
+    Node *node = new Node(id);
+
+    if (first_node == nullptr)
+    {
+        first_node = last_node = node;
+    }
+    else
+    {
+        last_node->setNextNode(node);
+        last_node = node;
+    }
+
+    order++;
 }
 
 void Graph::insertEdge(int id, int target_id, float weight)
 {
+    Node *node, *target_node;
+
+    node = getNode(id);
+    // try to get target_node only if node exists
+    if (node != nullptr)
+    {
+        target_node = getNode(target_id);
+
+        // inserts edge only if target_node also exists
+        if (target_node != nullptr)
+        {
+            node->insertEdge(target_id, weight);
+
+            if (directed)
+            {
+                node->incrementOutDegree();
+                target_node->incrementInDegree();
+            }
+            else
+            {
+                node->incrementInDegree();
+                target_node->insertEdge(id, weight);
+                target_node->incrementOutDegree();
+            }
+        }
+    }
 }
 
 void Graph::removeNode(int id)
@@ -108,10 +147,31 @@ void Graph::removeNode(int id)
 
 bool Graph::searchNode(int id)
 {
+    Node *node = first_node;
+
+    while (node != nullptr)
+    {
+        if (node->getId() == id)
+        {
+            return true;
+        }
+
+        node = node->getNextNode();
+    }
+
+    return false;
 }
 
 Node *Graph::getNode(int id)
 {
+    Node *node = first_node;
+
+    while (node != nullptr && node->getId() != id)
+    {
+        node = node->getNextNode();
+    }
+
+    return node;
 }
 
 //Function that prints a set of edges belongs breadth tree
