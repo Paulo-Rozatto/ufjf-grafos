@@ -1,6 +1,7 @@
 #include "Graph.h"
 #include "Node.h"
 #include "Edge.h"
+#include "MinHeap.h"
 #include <iostream>
 #include <fstream>
 #include <stack>
@@ -10,10 +11,15 @@
 #include <cstdlib>
 #include <ctime>
 #include <float.h>
+<<<<<<< HEAD
 #include <iomanip>
 #include <algorithm>
 #include <string.h>
 #include <vector>
+=======
+#include <iomanip>
+#include <climits>
+>>>>>>> 8979323ffe6d4b7f98731b9bffe0fe05fd33a7b4
 
 using namespace std;
 
@@ -113,7 +119,11 @@ void Graph::insertNode(int id)
         last_node = node;
     }
 
+<<<<<<< HEAD
 //    order++;
+=======
+    // order++;
+>>>>>>> 8979323ffe6d4b7f98731b9bffe0fe05fd33a7b4
 }
 
 void Graph::insertEdge(int id, int target_id, float weight)
@@ -198,6 +208,93 @@ float Graph::floydMarshall(int idSource, int idTarget)
 
 float Graph::dijkstra(int idSource, int idTarget)
 {
+    float pi[order];        // vetor que guarda a soma dos custos
+    MinHeap s_barra(order); // Heap minima para ser S-barra
+    MinHeapNode *minNode;   // No da heap que guarda id do vertice e soma dos custos;
+    Node *node;
+    Edge *edge;
+
+    // verifica se os vertices passados por paramentro existem no grafo
+    bool isSource = false, isTarget = false;
+    for (node = first_node; node != nullptr; node = node->getNextNode())
+    {
+        if (node->getId() == idSource)
+            isSource = true;
+        if (node->getId() == idTarget)
+            isTarget = true;
+    }
+    // se pelo menos um dos vertices passados por parametro nao existir no grafo, retorna infinito e exibe mensagem
+    if (!isSource || !isTarget)
+    {
+        cout << "Entrada inválida!" << endl;
+        return INT_MAX;
+    }
+
+    // inicializa s_barra e pi
+    node = first_node;
+    for (int i = 0; i < order; i++)
+    {
+        if (node->getId() == idSource)
+        {
+            pi[i] = 0;
+            s_barra.insertKey(new MinHeapNode(node->getId(), 0));
+        }
+        else
+        {
+            pi[i] = INT_MAX;
+            s_barra.insertKey(new MinHeapNode(node->getId(), INT_MAX));
+        }
+        node = node->getNextNode();
+    }
+
+    while (!s_barra.isEmpty())
+    {
+        // Remove o elemento com o menor peso de S-barra
+        minNode = s_barra.extractMin();
+
+        // Procura o elememento extraido na lista do grafo e salva o seu indice na variavel j para ser usado no vetor de distancias
+        int j = 0;
+        for (node = first_node; node->getId() != minNode->getId(); node = node->getNextNode())
+            j++;
+
+        edge = node->getFirstEdge();
+        while (edge != nullptr)
+        {
+            int pi_estrela = pi[j] + edge->getWeight();
+
+            // Procura o vertice adjacente a j na lista e salva seu indice na variavel k
+            int k = 0;
+            for (node = first_node; node->getId() != edge->getTargetId(); node = node->getNextNode())
+                k++;
+
+            if (pi_estrela < pi[k])
+            {
+                pi[k] = pi_estrela;
+
+                // pega o indice de k na heap de s_barra, caso seja -1, k nao esta em s barra
+                int idx = s_barra.getIndexOf(node->getId());
+                // se k nao estiver em s_barra, o adcione, se estiver atualize a soma de custos
+                if (idx == -1)
+                {
+                    s_barra.insertKey(new MinHeapNode(node->getId(), pi[k]));
+                }
+                else
+                {
+                    s_barra.decreaseKey(idx, pi[k]);
+                }
+            }
+
+            edge = edge->getNextEdge();
+        }
+
+        delete minNode;
+    }
+
+    int i = 0;
+    for (node = first_node; node->getId() != idTarget; node = node->getNextNode())
+        i++;
+
+    return pi[i];
 }
 
 //function that prints a topological sorting
