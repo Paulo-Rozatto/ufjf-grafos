@@ -16,6 +16,14 @@ Edge::Edge(int target_id){
 
 }
 
+Edge::Edge(int id, int target_id, int weight){
+    this->target_id = target_id;
+    this->origin_id = id;
+    this->next_edge = nullptr;
+    this->weight = weight;
+
+}
+
 // Destructor
 Edge::~Edge(){
 
@@ -28,32 +36,37 @@ Edge::~Edge(){
 
 // Getters
 int Edge::getTargetId(){
-
     return this->target_id;
 
 }
 
-Edge* Edge::getNextEdge(){
+int Edge::getOriginId(){
+    return this->origin_id;
+}
 
+Edge* Edge::getNextEdge(){
     return this->next_edge;
 
 }
 
+
 float Edge::getWeight(){
-
     return this->weight;
-
 }
+
 
 // Setters
 void Edge::setNextEdge(Edge* edge){
-
     this->next_edge = edge;
 
 }
 
 void Edge::setWeight(float weight){
-
     this->weight = weight;
-
 }
+
+
+
+
+
+

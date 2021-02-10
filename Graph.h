@@ -5,6 +5,7 @@
 #ifndef GRAPH_H_INCLUDED
 #define GRAPH_H_INCLUDED
 #include "Node.h"
+#include "Edge.h"
 #include <fstream>
 #include <stack>
 #include <list>
@@ -48,7 +49,7 @@ public:
     void topologicalSorting();
     void breadthFirstSearch(ofstream &output_file);
     Graph *getVertexInduced(int *listIdNodes);
-    Graph *agmKuskal();
+    Graph *agmKuskal(Graph *graph);
     Graph *agmPrim();
     float floydMarshall(int idSource, int idTarget);
     float dijkstra(int idSource, int idTarget);
@@ -59,7 +60,7 @@ public:
     float greedRactiveRandom();
 
 private:
-    //Auxiliar methods
+
 };
 
 #endif // GRAPH_H_INCLUDED

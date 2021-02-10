@@ -11,6 +11,9 @@
 #include <ctime>
 #include <float.h>
 #include <iomanip>
+#include <algorithm>
+#include <string.h>
+#include <vector>
 
 using namespace std;
 
@@ -28,7 +31,11 @@ Graph::Graph(int order, bool directed, bool weighted_edge, bool weighted_node)
     this->weighted_node = weighted_node;
     this->first_node = this->last_node = nullptr;
     this->number_edges = 0;
+
 }
+
+    vector<Edge> edges; //vetor das arestas
+    vector<int> allWeights; //vetor com todos os pesos
 
 // Destructor
 Graph::~Graph()
@@ -49,12 +56,10 @@ Graph::~Graph()
 // Getters
 int Graph::getOrder()
 {
-
     return this->order;
 }
 int Graph::getNumberEdges()
 {
-
     return this->number_edges;
 }
 //Function that verifies if the graph is directed
@@ -108,14 +113,19 @@ void Graph::insertNode(int id)
         last_node = node;
     }
 
-    order++;
+//    order++;
 }
 
 void Graph::insertEdge(int id, int target_id, float weight)
 {
-    Node *node, *target_node;
+    Edge edge(id, target_id, weight); //cria aresta com as configurações dadas
+    edges.push_back(edge); // preenche o vetor de arestas
+    allWeights.push_back(weight); // preenche o vetor de pesos
 
+
+    Node *node, *target_node;
     node = getNode(id);
+
     // try to get target_node only if node exists
     if (node != nullptr)
     {
@@ -130,6 +140,7 @@ void Graph::insertEdge(int id, int target_id, float weight)
             {
                 node->incrementOutDegree();
                 target_node->incrementInDegree();
+
             }
             else
             {
@@ -137,6 +148,7 @@ void Graph::insertEdge(int id, int target_id, float weight)
                 target_node->insertEdge(id, weight);
                 target_node->incrementOutDegree();
             }
+
         }
     }
 }
@@ -196,13 +208,74 @@ void topologicalSorting()
 void breadthFirstSearch(ofstream &output_file)
 {
 }
+
 Graph *getVertexInduced(int *listIdNodes)
 {
 }
 
-Graph *agmKuskal()
-{
+/// As funções "searchForSubset" e "join" tendem a detectar os ciclos em grafos NÃO direcionados. Condição fundamental
+/// na montagem do algoritmo de Kruskal.
+//essa função busca o subconjunto (subset) do nó "i" de forma recursiva.
+int searchForSubset(int subset[], int i){
+    if(subset[i] == -1)
+        return i;
+    return searchForSubset(subset, subset[i]);
 }
+//a função de "join" é unir dois "subsets" (subconjuntos) em 1 único subconjunto.
+void join(int subset[], int v1, int v2){
+    int v1_set = searchForSubset(subset, v1);
+    int v2_set = searchForSubset(subset, v2);
+    subset[v1_set] = v2_set;
+}
+
+Graph *Graph::agmKuskal(Graph *graph){
+    vector<Edge> tree; //vetor para armazenar a solução do problema
+
+    int size_edges = edges.size();
+
+// estou alocando os valores de allWeights nas respectivas Edges, uma vez que os referidos vetores foram preenchidos
+// simultaneamente.
+    for(int i = 0; i < size_edges/2; i++){
+        edges[i].setWeight(allWeights[i+size_edges/2]);
+    }
+
+// Ordena as arestas pelo menor peso.
+    sort(edges.begin(), edges.end());
+
+    int V = graph->getOrder() + 1;
+    int * subset = new int[V];
+
+//  juntamos todos os subconjuntos em um conjunto próprio. Ex: S={A, B, C, D, E}.
+    memset(subset, -1, sizeof(int) * V);
+
+    for(int i = 0; i < size_edges; i++){
+        int v1 = searchForSubset(subset, edges[i].getOriginId());
+        int v2 = searchForSubset(subset, edges[i].getTargetId());
+
+// se forem diferentes, sabemos que não forma ciclo, portanto, inserimos no vetor "tree".
+        if(v1 != v2){
+            tree.push_back(edges[i]);
+            join(subset, v1, v2);
+        }
+    }
+
+    int size_tree = tree.size();
+
+// tem a função de mostrar as arestas selecionadas e seus respectivos pesos, no final, tem-se o custo total.
+    cout << endl;
+    cout << "Caminho minimo gerado por Kruskal" << endl;
+    float weightResult = 0;
+    for(int i = 0; i < size_tree; i++){
+        int v1 = tree[i].getOriginId();
+        int v2 = tree[i].getTargetId();
+        int w = tree[i].getWeight();
+        weightResult = w + weightResult;
+        cout << "(" << v1 << ", " << v2 << ") - peso = " << w << endl;
+    }
+    cout << "Peso total do caminho: " << weightResult << endl;
+    cout << endl;
+}
+
 Graph *agmPrim()
 {
 }
