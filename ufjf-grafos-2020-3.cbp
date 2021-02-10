@@ -25,6 +25,9 @@
 		<Unit filename="Edge.h" />
 		<Unit filename="Graph.cpp" />
 		<Unit filename="Graph.h" />
+		<Unit filename="MinHeap.cpp" />
+		<Unit filename="MinHeap.h" />
+		<Unit filename="MinHeapNode.h" />
 		<Unit filename="Node.cpp" />
 		<Unit filename="Node.h" />
 		<Unit filename="entrada.txt" />

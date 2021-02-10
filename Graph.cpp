@@ -11,16 +11,12 @@
 #include <cstdlib>
 #include <ctime>
 #include <float.h>
-<<<<<<< HEAD
 #include <iomanip>
 #include <algorithm>
 #include <string.h>
 #include <vector>
-=======
 #include <iomanip>
 #include <climits>
->>>>>>> 8979323ffe6d4b7f98731b9bffe0fe05fd33a7b4
-
 using namespace std;
 
 /**************************************************************************************************
@@ -119,11 +115,8 @@ void Graph::insertNode(int id)
         last_node = node;
     }
 
-<<<<<<< HEAD
 //    order++;
-=======
-    // order++;
->>>>>>> 8979323ffe6d4b7f98731b9bffe0fe05fd33a7b4
+
 }
 
 void Graph::insertEdge(int id, int target_id, float weight)
