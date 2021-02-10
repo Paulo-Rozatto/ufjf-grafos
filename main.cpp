@@ -20,6 +20,7 @@ Graph *leitura(ifstream &input_file, int directed, int weightedEdge, int weighte
     int idNodeTarget;
     int order;
 
+
     //Pegando a ordem do grafo
     input_file >> order;
 
@@ -28,10 +29,11 @@ Graph *leitura(ifstream &input_file, int directed, int weightedEdge, int weighte
 
     //Leitura de arquivo
 
+
     if (!graph->getWeightedEdge() && !graph->getWeightedNode())
     {
 
-        while (input_file >> idNodeSource >> idNodeTarget)
+        while (input_file >> idNodeSource >> idNodeTarget )
         {
             if (!graph->searchNode(idNodeSource))
                 graph->insertNode(idNodeSource);
@@ -47,6 +49,7 @@ Graph *leitura(ifstream &input_file, int directed, int weightedEdge, int weighte
 
         while (input_file >> idNodeSource >> idNodeTarget >> edgeWeight)
         {
+
             if (!graph->searchNode(idNodeSource))
                 graph->insertNode(idNodeSource);
             if (!graph->searchNode(idNodeTarget))
@@ -125,13 +128,13 @@ int menu()
 
     cout << "MENU" << endl;
     cout << "----" << endl;
-    cout << "[1] Subgrafo induzido por conjunto de vértices" << endl;
-    cout << "[2] Caminho Mínimo entre dois vértices - Dijkstra" << endl;
-    cout << "[3] Caminho Mínimo entre dois vértices - Floyd" << endl;
-    cout << "[4] Árvore Geradora Mínima de Prim" << endl;
-    cout << "[5] Árvore Geradora Mínima de Kruskal" << endl;
+    cout << "[1] Subgrafo induzido por conjunto de vertices" << endl;
+    cout << "[2] Caminho Minimo entre dois vertices - Dijkstra" << endl;
+    cout << "[3] Caminho Minimo entre dois vertices - Floyd" << endl;
+    cout << "[4] Arvore Geradora Minima de Prim" << endl;
+    cout << "[5] Arvore Geradora Minima de Kruskal" << endl;
     cout << "[6] Imprimir caminhamento em largura" << endl;
-    cout << "[7] Imprimir ordenacao topológica" << endl;
+    cout << "[7] Imprimir ordenacao topologica" << endl;
     cout << "[8] Algoritmo Guloso" << endl;
     cout << "[9] Algoritmo Guloso Randomizado " << endl;
     cout << "[10] Algoritmo Guloso Randomizado Reativo" << endl;
@@ -151,7 +154,6 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
     //Subgrafo induzido por um conjunto de vértices X;
     case 1:
     {
-
         break;
     }
         //Caminho mínimo entre dois vértices usando Dijkstra;
@@ -181,7 +183,7 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
         break;
     }
 
-        //AGM - Kruscal;
+
     case 4:
     {
 
@@ -192,8 +194,25 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
     case 5:
     {
 
+
+// report bug - algoritmo de leitura não pega um 3 parametro (peso) de entrada.txt; Aqui se faz necessária a inserção manual
+// das arestas, Ex:
+ graph -> insertEdge(1, 2, 7);
+ graph -> insertEdge(1, 3, 1);
+ graph -> insertEdge(2, 4, 4);
+ graph -> insertEdge(2, 6, 1);
+ graph -> insertEdge(3, 2, 5);
+ graph -> insertEdge(3, 5, 2);
+ graph -> insertEdge(3, 6, 7);
+ graph -> insertEdge(5, 2, 2);
+ graph -> insertEdge(5, 4, 5);
+ graph -> insertEdge(6, 5, 3);
+
+        graph->agmKuskal(graph);
         break;
     }
+
+
 
         //Busca em largura;
     case 6:
@@ -272,7 +291,6 @@ int main(int argc, char const *argv[])
 
     if (input_file.is_open())
     {
-
         graph = leitura(input_file, atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
     }
     else
