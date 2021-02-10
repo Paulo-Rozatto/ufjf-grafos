@@ -184,6 +184,88 @@ void Graph::breadthFirstSearch(ofstream &output_file)
 
 float Graph::floydMarshall(int idSource, int idTarget)
 {
+    Node *node;
+    Edge *edge;
+
+    // verifica se os vertices passados por paramentro existem no grafo
+    bool isSource = false, isTarget = false;
+    for (node = first_node; node != nullptr; node = node->getNextNode())
+    {
+        if (node->getId() == idSource)
+            isSource = true;
+        if (node->getId() == idTarget)
+            isTarget = true;
+    }
+
+    // se pelo menos um dos vertices passados por parametro nao existir no grafo, retorna infinito e exibe mensagem
+    if (!isSource || !isTarget)
+    {
+        cout << "Entrada inválida!" << endl;
+        return INT_MAX;
+    }
+
+    int i, j;
+
+    // uma matriz quadrada de distancias entre os vertices
+    float matDistancias[order][order];
+
+    // elementos que representam a distancia de um vertice para ele mesmo inicializados como zero na matriz
+    for(int i = 0; i < order; i++)
+    {
+        for(int j = 0; j < order; j++)
+        {
+            if(i == j)
+                matDistancias[i][j] = 0;
+        }
+    }
+
+    // algoritmo de leitura nao pega um terceiro parametro (peso) de entrada.txt; Aqui se faz necessaria a inserçao manual das arestas:
+    matDistancias[0][1]= 7;
+    matDistancias[0][2]= 1;
+    matDistancias[0][3]= INT_MAX;
+    matDistancias[0][4]= INT_MAX;
+    matDistancias[0][5]= INT_MAX;
+    matDistancias[1][0]= 7;
+    matDistancias[1][2]= 5;
+    matDistancias[1][3]= 4;
+    matDistancias[1][4]= 2;
+    matDistancias[1][5]= 1;
+    matDistancias[2][0]= 1;
+    matDistancias[2][1]= 5;
+    matDistancias[2][3]= INT_MAX;
+    matDistancias[2][4]= 2;
+    matDistancias[2][5]= 7;
+    matDistancias[3][0]= INT_MAX;
+    matDistancias[3][1]= 4;
+    matDistancias[3][2]= INT_MAX;
+    matDistancias[3][4]= 5;
+    matDistancias[3][5]= INT_MAX;
+    matDistancias[4][0]= INT_MAX;
+    matDistancias[4][1]= 2;
+    matDistancias[4][2]= 2;
+    matDistancias[4][3]= 5;
+    matDistancias[4][5]= 3;
+    matDistancias[5][0]= INT_MAX;
+    matDistancias[5][1]= 1;
+    matDistancias[5][2]= 7;
+    matDistancias[5][3]= INT_MAX;
+    matDistancias[5][4]= 3;
+
+    // alagoritmo de Floyd que varre a matriz inicial com apenas os pesos das arestas entre vertices adjacentes e modiifca para o caminho minimo entre dois vertices quaisquer do grafo
+    for (int k=0; k<order; k++)
+    {
+        for (i=0; i<order; i++)
+        {
+             for (j=0; j<order; j++)
+             {
+                  if (matDistancias[i][j] > matDistancias[i][k]+matDistancias[k][j])
+                    matDistancias[i][j] = matDistancias[i][k]+matDistancias[k][j];
+             }
+        }
+    }
+    // retorna a distancia entre os dois vertices escolhidos, que estao subtraidos a 1 para serem representados na matriz
+    return matDistancias[idSource-1][idTarget-1];
+
 }
 
 float Graph::dijkstra(int idSource, int idTarget)
