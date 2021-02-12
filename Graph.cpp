@@ -158,6 +158,7 @@ void Graph::insertEdge(int id, int target_id, float weight)
 
 void Graph::removeNode(int id)
 {
+
 }
 
 bool Graph::searchNode(int id)
@@ -381,8 +382,34 @@ void breadthFirstSearch(ofstream &output_file)
 {
 }
 
-Graph *getVertexInduced(int *listIdNodes)
+Graph* Graph::getVertexInduced(int *listIdNodes, Graph &graph, int x)
 {
+    //cria uma copia do grafo original para serem feitas as operações
+    Graph *g1 = new Graph(graph);
+    Node *node = graph.getFirstNode();
+
+    //percorre o grafo em busca dos nos passados pelo array por parametro
+    while(node != nullptr)
+    {
+        bool verifica = false;
+
+        for(int i = 0; i < x; i++)
+        {
+            if(node->getId() == listIdNodes[i])
+            {
+                verifica = true;
+            }
+        }
+        //exclui o nó do grafo copia para transformar ele em subgrafo induzido
+        if(!verifica)
+        {
+            g1->removeNode(node->getId());
+        }
+        node = node->getNextNode();
+    }
+    //retorna o subgrafo induzido
+    return g1;
+
 }
 
 /// As funções "searchForSubset" e "join" tendem a detectar os ciclos em grafos NÃO direcionados. Condição fundamental
