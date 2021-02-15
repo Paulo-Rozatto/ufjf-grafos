@@ -154,6 +154,31 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
     //Subgrafo induzido por um conjunto de vértices X;
     case 1:
     {
+        int x;
+        cout << "Quantos vertices voce quer digitar?" << endl;
+        cin >> x;
+        int vertices[x];
+        cout << "Digite os vertices: ";
+        for(int i = 0; i < x; i++)
+        {
+            cin >> vertices[i];
+        }
+        Graph *g = g->getVertexInduced(vertices, *graph, x);
+        Node *node = graph->getFirstNode();
+        cout << "vertices grafo original: ";
+
+        while(node != nullptr)
+        {
+            cout << node->getId();
+            node = node->getNextNode();
+        }
+        cout << endl;
+        cout << "vertices grafo induzido: ";
+        for(Node *node = g->getFirstNode(); node != nullptr; node = node->getNextNode())
+        {
+            cout << node->getId();
+        }
+        cout << endl;
         break;
     }
         //Caminho mínimo entre dois vértices usando Dijkstra;
@@ -172,7 +197,14 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
         //Caminho mínimo entre dois vértices usando Floyd;
     case 3:
     {
-
+        int source, target;
+        cout << "Caminho minimo entre dois vertices usando Floyd;" << endl;
+        cout << "Digite o id do vertice de partida: ";
+        cin >> source;
+        cout << "Digite o id do vertice de destino: ";
+        cin >> target;
+        cout << "Comprimento do caminho minimo entre os vertices escolhidos: ";
+        cout << graph->floydMarshall(source, target) << endl;
         break;
     }
 
