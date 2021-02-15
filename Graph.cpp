@@ -123,7 +123,7 @@ void Graph::insertEdge(int id, int target_id, float weight)
 {
     Edge edge(id, target_id, weight); //cria aresta com as configurações dadas
     edges.push_back(edge); // preenche o vetor de arestas
-    allWeights.push_back(weight); // preenche o vetor de pesos
+    //allWeights.push_back(weight); // preenche o vetor de pesos
 
 
     Node *node, *target_node;
@@ -325,15 +325,15 @@ Graph *Graph::agmKuskal(Graph *graph){
 
 // estou alocando os valores de allWeights nas respectivas Edges, uma vez que os referidos vetores foram preenchidos
 // simultaneamente.
-    for(int i = 0; i < size_edges/2; i++){
-        edges[i].setWeight(allWeights[i+size_edges/2]);
-    }
+//    for(int i = 0; i < size_edges/2; i++){
+//        edges[i].setWeight(allWeights[i+size_edges/2]);
+//    }
 
 // Ordena as arestas pelo menor peso.
     sort(edges.begin(), edges.end());
 
-    int V = graph->getOrder() + 1;
-    int * subset = new int[V];
+    int V = graph->getOrder();
+    int * subset = new int[V+1];
 
 //  juntamos todos os subconjuntos em um conjunto próprio. Ex: S={A, B, C, D, E}.
     memset(subset, -1, sizeof(int) * V);
