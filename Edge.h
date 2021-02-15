@@ -31,6 +31,7 @@ class Edge{
         // Setters
         void setNextEdge(Edge* edge);
         void setWeight(float weight);
+        // estou sobescrevendo o operador < para ordenar os pesos do maior para o menor
         bool operator < (const Edge& edge2) const{
             return(weight < edge2.weight);
         }

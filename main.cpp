@@ -218,21 +218,6 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
         //AGM Prim;
     case 5:
     {
-
-
-// report bug - algoritmo de leitura não pega um 3 parametro (peso) de entrada.txt; Aqui se faz necessária a inserção manual
-// das arestas, Ex:
-// graph -> insertEdge(1, 2, 7);
-// graph -> insertEdge(1, 3, 1);
-// graph -> insertEdge(2, 4, 4);
-// graph -> insertEdge(2, 6, 1);
-// graph -> insertEdge(3, 2, 5);
-// graph -> insertEdge(3, 5, 2);
-// graph -> insertEdge(3, 6, 7);
-// graph -> insertEdge(5, 2, 2);
-// graph -> insertEdge(5, 4, 5);
-// graph -> insertEdge(6, 5, 3);
-
         graph->agmKuskal(graph);
         break;
     }

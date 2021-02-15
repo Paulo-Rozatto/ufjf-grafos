@@ -37,7 +37,6 @@ Graph::Graph(int order, bool directed, bool weighted_edge, bool weighted_node)
 }
 
     vector<Edge> edges; //vetor das arestas
-    vector<int> allWeights; //vetor com todos os pesos
 
 // Destructor
 Graph::~Graph()
@@ -123,7 +122,6 @@ void Graph::insertEdge(int id, int target_id, float weight)
 {
     Edge edge(id, target_id, weight); //cria aresta com as configurações dadas
     edges.push_back(edge); // preenche o vetor de arestas
-    //allWeights.push_back(weight); // preenche o vetor de pesos
 
 
     Node *node, *target_node;
@@ -432,11 +430,6 @@ Graph *Graph::agmKuskal(Graph *graph){
 
     int size_edges = edges.size();
 
-// estou alocando os valores de allWeights nas respectivas Edges, uma vez que os referidos vetores foram preenchidos
-// simultaneamente.
-//    for(int i = 0; i < size_edges/2; i++){
-//        edges[i].setWeight(allWeights[i+size_edges/2]);
-//    }
 
 // Ordena as arestas pelo menor peso.
     sort(edges.begin(), edges.end());
@@ -462,7 +455,7 @@ Graph *Graph::agmKuskal(Graph *graph){
 
 // tem a função de mostrar as arestas selecionadas e seus respectivos pesos, no final, tem-se o custo total.
     cout << endl;
-    cout << "Caminho minimo gerado por Kruskal" << endl;
+    cout << "Arvore Geradora Minima usando algoritmo de Kruskal" << endl;
     float weightResult = 0;
     for(int i = 0; i < size_tree; i++){
         int v1 = tree[i].getOriginId();
@@ -471,8 +464,9 @@ Graph *Graph::agmKuskal(Graph *graph){
         weightResult = w + weightResult;
         cout << "(" << v1 << ", " << v2 << ") - peso = " << w << endl;
     }
-    cout << "Peso total do caminho: " << weightResult << endl;
+    cout << "Peso total do arvore: " << weightResult << endl;
     cout << endl;
+
 }
 
 Graph *agmPrim()
