@@ -212,6 +212,7 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
     case 4:
     {
 
+         graph->agmPrim();
         break;
     }
 
