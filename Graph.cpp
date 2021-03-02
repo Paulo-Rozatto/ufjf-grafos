@@ -468,7 +468,88 @@ Graph *Graph::agmKuskal(Graph *graph){
     cout << endl;
 
 }
-
-Graph *agmPrim()
+int atualizaCusto(vector<Edge> custo, int prox[], Edge aux, int id){//função auxiliar do agmPrim
+    if(aux.getOriginId() == id)
+        if(prox[aux.getTargetId() - 1] != 0 && (aux.getWeight() < custo[aux.getTargetId() - 1].getWeight())){
+            prox[aux.getTargetId() - 1] = id;
+            return (aux.getTargetId() - 1);
+        }
+    if(aux.getTargetId() == id)
+        if(prox[aux.getOriginId() - 1] != 0 && (aux.getWeight() < custo[aux.getOriginId() - 1].getWeight())){
+            prox[aux.getOriginId() - 1] = id;
+            return (aux.getOriginId() - 1);
+        }
+    return -1;
+}
+Graph *Graph::agmPrim()
 {
+    int tam = edges.size(); //armazena a quantidade de arestas.
+    sort(edges.begin(), edges.end());
+
+    int tamG = this->getOrder();//armazena número de vértices.
+    int prox[tamG];//armazena o id do vértice mais próximo que ainda não foi inserido na solução
+    int u = edges[0].getOriginId();
+    int v = edges[0].getTargetId();
+    vector<Edge> custo; //armazena os menores custos de arestas incidentes na solução.
+    for(int i = 0; i<tamG; i++){//Inicia o vetor de custo com valores máximos e preenche o vetor prox.
+        prox[i] = u;
+        custo.push_back(Edge(i+1, u, INT_MAX));
+    }
+    prox[u - 1] = 0;
+    prox[v - 1] = 0;
+    custo[u - 1] = edges[0];
+    custo[v - 1] = edges[0];
+
+    vector<vector<Edge*>> aux(tamG);
+
+    for(int i = 0; i<tam; i++){//atualiza custo e faz um "pseudo grafo".
+//Observações: não consegui implementar utilizando as funções do tipo Graph (o que reduziria bastante a ordem do algoritmo), pois toda vez que eu utilizava algum get da Edge, eu recebia um valor errado.
+        int id = atualizaCusto(custo, prox, edges[i], u);
+        int idk = atualizaCusto(custo, prox, edges[i], v);
+        if(id != -1){
+            custo[id] = edges[i];
+        }
+        else{
+            if(idk != -1){
+                custo[idk] = edges[i];
+            }
+            else{
+                aux[edges[i].getOriginId() - 1].push_back(&edges[i]);
+                aux[edges[i].getTargetId() - 1].push_back(&edges[i]);
+            }
+        }
+    }
+    int cont = 0;
+
+    while(cont < tamG-2){
+        //encontra a aresta j que não faz parte da solução e tem o menor peso.
+        int i, j;
+        for(i = 0; i < tamG; i++)
+            if(prox[i]!=0){
+                j = i;
+                break;
+            }
+        for( ;i < tamG; i++)
+            if(prox[i] != 0 && custo[i].getWeight() < custo[j].getWeight())
+                j = i;
+        prox[j] = 0; //atualiza prox.
+        for(i = 0; (aux[j].begin() + i)<aux[j].end(); i++){//atualiza custo em relação a j.
+            if(aux[j][i]->getOriginId() != 0){
+                int id = atualizaCusto(custo, prox, *aux[j][i], j+1);
+                if(id != -1){
+                    custo[id] = *(aux[j][i]);
+                }
+            }
+        }
+        cont ++;
+    }
+
+    sort(custo.begin(), custo.end());
+    cout << "Arvore Geradora Minima usando algoritmo de Prim" << endl << endl;
+    float weightResult = 0;
+    for(int i = 1; i<tamG; i++){//Imprime a solução
+        cout << "custo: (" << custo[i].getOriginId() << ", " << custo[i].getTargetId() << ") - peso = " << custo[i].getWeight() << endl;
+        weightResult += custo[i].getWeight();
+    }
+    cout << endl << "Peso total do arvore: " << weightResult << endl << endl;
 }
