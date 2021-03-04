@@ -195,6 +195,58 @@ Node *Graph::getNode(int id)
 
 void Graph::breadthFirstSearch(ofstream &output_file)
 {
+    int tam = this->getOrder();//número de nós visitados
+    bool *visitados = new bool[tam];//vetor que guarda se o vértcie foi visitado
+    vector<Node*> nos(tam);//vetor que armazena o endereço de todos os nós
+    queue<Node*> fila;//fila auxilar na ordem de visitação
+    vector<Edge*> tree;//árvore gerada pelo algoritmo de busca em largura
+    Node *auxNode = this->getFirstNode();//nó auxiliar
+    Edge *auxEdge;//aresta auxiliar
+    for(int i = 0; i < tam; i++){//iniciando visitados
+        *(visitados + i) = false;
+        nos[auxNode->getId()] = auxNode;
+        auxNode = auxNode->getNextNode();
+    }
+    fila.push(nos[0]);//inciando a partir do vértice de índice 0
+    *(visitados + fila.front()->getId()) = true;
+    while(!fila.empty() && tree.size() != (tam-1)){
+        auxNode = fila.front();
+        fila.pop();
+        auxEdge = auxNode->getFirstEdge();
+        int cont = 0;
+        while((cont < (auxNode->getOutDegree() + auxNode->getInDegree())) && auxEdge != nullptr){//adiciona todos os nós visihos não visitados
+            if(*(visitados + auxEdge->getTargetId()) == false){
+                *(visitados + auxEdge->getTargetId()) = true;
+                fila.push(nos[auxEdge->getTargetId()]);//atualiza a ordem de inserção
+                Edge *galho = new Edge(auxNode->getId(), auxEdge->getTargetId(), auxEdge->getWeight());
+                tree.push_back(galho);
+                if(tree.size() == (tam-1))
+                    break;
+            }
+            auxEdge = auxEdge->getNextEdge();
+            cont ++;
+        }
+    }
+    float weightResult = 0;
+    cout << endl << "Busca em Largura" << endl << endl;
+    if(this->getDirected()){
+        output_file << "digraph busca{" << endl;
+        for(int i = 0;  i < tree.size(); i++){
+            cout << "(" << tree[i]->getOriginId() << ", " << tree[i]->getTargetId() << ") - peso = " << tree[i]->getWeight() << endl;
+            weightResult += tree[i]->getWeight();
+            output_file << "\t" << tree[i]->getOriginId() << " -> " << tree[i]->getTargetId() << ";" << endl;
+        }
+    }
+    else{
+        output_file << "graph busca{" << endl;
+        for(int i = 0;  i < tree.size(); i++){
+            cout << "(" << tree[i]->getOriginId() << ", " << tree[i]->getTargetId() << ") - peso = " << tree[i]->getWeight() << endl;
+            weightResult += tree[i]->getWeight();
+            output_file << "\t" << tree[i]->getOriginId() << " -- " << tree[i]->getTargetId() << ";" << endl;
+        }
+    }
+    output_file << "}" << endl;
+    cout << endl << "Peso total da arvore: " << weightResult << endl << endl;
 }
 
 float Graph::floydMarshall(int idSource, int idTarget)
@@ -411,6 +463,7 @@ void Graph::auxTopologicalSorting(int index, vector<bool>& nosVisitados, stack<i
 
 void breadthFirstSearch(ofstream &output_file)
 {
+
 }
 
 Graph* Graph::getVertexInduced(int *listIdNodes, Graph &graph, int x)
@@ -457,7 +510,6 @@ void join(int subset[], int v1, int v2){
     int v2_set = searchForSubset(subset, v2);
     subset[v1_set] = v2_set;
 }
-
 Graph *Graph::agmKuskal(Graph *graph){
     vector<Edge> tree; //vetor para armazenar a solução do problema
 
@@ -501,88 +553,57 @@ Graph *Graph::agmKuskal(Graph *graph){
     cout << endl;
 
 }
-int atualizaCusto(vector<Edge> custo, int prox[], Edge aux, int id){//função auxiliar do agmPrim
-    if(aux.getOriginId() == id)
-        if(prox[aux.getTargetId() - 1] != 0 && (aux.getWeight() < custo[aux.getTargetId() - 1].getWeight())){
-            prox[aux.getTargetId() - 1] = id;
-            return (aux.getTargetId() - 1);
-        }
-    if(aux.getTargetId() == id)
-        if(prox[aux.getOriginId() - 1] != 0 && (aux.getWeight() < custo[aux.getOriginId() - 1].getWeight())){
-            prox[aux.getOriginId() - 1] = id;
-            return (aux.getOriginId() - 1);
-        }
-    return -1;
-}
 Graph *Graph::agmPrim()
 {
-    int tam = edges.size(); //armazena a quantidade de arestas.
-    sort(edges.begin(), edges.end());
-
-    int tamG = this->getOrder();//armazena número de vértices.
-    int prox[tamG];//armazena o id do vértice mais próximo que ainda não foi inserido na solução
-    int u = edges[0].getOriginId();
-    int v = edges[0].getTargetId();
+    int tam = this->getOrder();//armazena número de vértices.
+    int prox[tam];//armazena o id do vértice mais próximo que ainda não foi inserido na solução
+    Graph *tree = new Graph(this->getOrder(), this->getDirected(), this->getWeightedEdge(), this->getWeightedNode());
     vector<Edge> custo; //armazena os menores custos de arestas incidentes na solução.
-    for(int i = 0; i<tamG; i++){//Inicia o vetor de custo com valores máximos e preenche o vetor prox.
-        prox[i] = u;
-        custo.push_back(Edge(i+1, u, INT_MAX));
+    vector<Node*> nos(tam);
+    Node *auxNode = this->getFirstNode();
+    int primeiro = auxNode->getId();
+    Edge *auxEdge;
+    for(int i = 0; i<tam; i++){//Inicia o vetor de custo com valores máximos e preenche o vetor prox.
+        prox[i] = primeiro;
+        custo.push_back(Edge(i, primeiro, INT_MAX));
+        nos[auxNode->getId()] = auxNode;
+        tree->insertNode(auxNode->getId());
+        auxNode = auxNode->getNextNode();
     }
-    prox[u - 1] = 0;
-    prox[v - 1] = 0;
-    custo[u - 1] = edges[0];
-    custo[v - 1] = edges[0];
-
-    vector<vector<Edge*>> aux(tamG);
-
-    for(int i = 0; i<tam; i++){//atualiza custo e faz um "pseudo grafo".
-//Observações: não consegui implementar utilizando as funções do tipo Graph (o que reduziria bastante a ordem do algoritmo), pois toda vez que eu utilizava algum get da Edge, eu recebia um valor errado.
-        int id = atualizaCusto(custo, prox, edges[i], u);
-        int idk = atualizaCusto(custo, prox, edges[i], v);
-        if(id != -1){
-            custo[id] = edges[i];
-        }
-        else{
-            if(idk != -1){
-                custo[idk] = edges[i];
+    int i, j, k = 0;
+    j = (primeiro);
+    while(k < tam){
+        prox[j] = -1; //atualiza prox.
+        auxNode = nos[j];
+        auxEdge = auxNode->getFirstEdge();
+        int cont = 0;
+        while((cont < (auxNode->getOutDegree() + auxNode->getInDegree())) && auxEdge != nullptr){
+            if(prox[auxEdge->getTargetId()] !=-1 && (custo[auxEdge->getTargetId()].getWeight() > auxEdge->getWeight())){
+                custo[auxEdge->getTargetId()] = Edge(auxNode->getId(), auxEdge->getTargetId(), auxEdge->getWeight());
+                prox[auxEdge->getTargetId()] = auxNode->getId();
             }
-            else{
-                aux[edges[i].getOriginId() - 1].push_back(&edges[i]);
-                aux[edges[i].getTargetId() - 1].push_back(&edges[i]);
-            }
+            auxEdge = auxEdge->getNextEdge();
+            cont ++;
         }
-    }
-    int cont = 0;
-
-    while(cont < tamG-2){
         //encontra a aresta j que não faz parte da solução e tem o menor peso.
-        int i, j;
-        for(i = 0; i < tamG; i++)
-            if(prox[i]!=0){
+        for(i = 0; i < tam; i++)
+            if(prox[i]!=-1){
                 j = i;
                 break;
             }
-        for( ;i < tamG; i++)
-            if(prox[i] != 0 && custo[i].getWeight() < custo[j].getWeight())
+        for( ;i < tam; i++)
+            if(prox[i] != -1 && custo[i].getWeight() < custo[j].getWeight())
                 j = i;
-        prox[j] = 0; //atualiza prox.
-        for(i = 0; (aux[j].begin() + i)<aux[j].end(); i++){//atualiza custo em relação a j.
-            if(aux[j][i]->getOriginId() != 0){
-                int id = atualizaCusto(custo, prox, *aux[j][i], j+1);
-                if(id != -1){
-                    custo[id] = *(aux[j][i]);
-                }
-            }
-        }
-        cont ++;
+        k ++;
     }
-
     sort(custo.begin(), custo.end());
     cout << "Arvore Geradora Minima usando algoritmo de Prim" << endl << endl;
     float weightResult = 0;
-    for(int i = 1; i<tamG; i++){//Imprime a solução
-        cout << "custo: (" << custo[i].getOriginId() << ", " << custo[i].getTargetId() << ") - peso = " << custo[i].getWeight() << endl;
+    for(int i = 0; i<tam-1; i++){//Imprime a solução
+        cout << "(" << custo[i].getOriginId() << ", " << custo[i].getTargetId() << ") - peso = " << custo[i].getWeight() << endl;
         weightResult += custo[i].getWeight();
+        tree->insertEdge(custo[i].getOriginId(), custo[i].getTargetId(), custo[i].getWeight());
     }
-    cout << endl << "Peso total do arvore: " << weightResult << endl << endl;
+    cout << endl << "Peso total da arvore: " << weightResult << endl << endl;
+    return tree;
 }

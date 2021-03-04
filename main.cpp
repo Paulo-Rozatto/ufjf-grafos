@@ -121,6 +121,42 @@ Graph *leituraInstancia(ifstream &input_file, int directed, int weightedEdge, in
     return graph;
 }
 
+void escrita(Graph *graph, ofstream &output_file){
+    if(graph != nullptr){
+        Node *auxNode = graph->getFirstNode();
+        Edge *auxEdge;
+        int tam = graph->getOrder();
+        if(graph->getDirected()){
+            output_file << "strict digraph grafo{" << endl;
+            for(int i = 0; i < tam; i++){
+                auxEdge = auxNode->getFirstEdge();
+                int cont = 0;
+                while((cont < (auxNode->getOutDegree() + auxNode->getInDegree())) && auxEdge != nullptr){
+                    output_file << "\t" <<  auxNode->getId() << " -> " << auxEdge->getTargetId() << ";" << endl;
+                    auxEdge = auxEdge->getNextEdge();
+                    cont ++;
+                }
+                auxNode = auxNode->getNextNode();
+            }
+            output_file << "}" << endl;
+        }
+        else{
+           output_file << "strict graph grafo{" << endl;
+            for(int i = 0; i < tam; i++){
+                auxEdge = auxNode->getFirstEdge();
+                int cont = 0;
+                while((cont < (auxNode->getOutDegree() + auxNode->getInDegree())) && auxEdge != nullptr){
+                    output_file << "\t" <<  auxNode->getId() << " -- " << auxEdge->getTargetId() << ";" << endl;
+                    auxEdge = auxEdge->getNextEdge();
+                    cont ++;
+                }
+                auxNode = auxNode->getNextNode();
+            }
+            output_file << "}" << endl;
+        }
+    }
+}
+
 int menu()
 {
 
@@ -212,7 +248,8 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
     case 4:
     {
 
-         graph->agmPrim();
+        Graph *tree = graph->agmPrim();
+        escrita(tree, output_file);
         break;
     }
 
@@ -228,7 +265,7 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
         //Busca em largura;
     case 6:
     {
-
+        graph->breadthFirstSearch(output_file);
         break;
     }
         //Ordenação Topologica;
