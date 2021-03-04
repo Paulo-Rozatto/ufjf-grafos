@@ -9,6 +9,7 @@
 #include <fstream>
 #include <stack>
 #include <list>
+#include <vector>
 
 using namespace std;
 
@@ -22,6 +23,7 @@ private:
     bool directed;
     bool weighted_edge;
     bool weighted_node;
+    list<int>* adjacencia; /// lista de adjacencia
     Node *first_node;
     Node *last_node;
 
@@ -46,7 +48,8 @@ public:
     Node *getNode(int id);
 
     //methods phase1
-    void topologicalSorting();
+    void topologicalSorting(Graph *graph);
+    void auxTopologicalSorting(int index, vector<bool>& nosVisitados, stack<int>& Pilha);
     void breadthFirstSearch(ofstream &output_file);
     Graph *getVertexInduced(int *listIdNodes, Graph &graph, int x);
     Graph *agmKuskal(Graph *graph);

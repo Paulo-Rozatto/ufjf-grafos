@@ -33,6 +33,7 @@ Graph::Graph(int order, bool directed, bool weighted_edge, bool weighted_node)
     this->weighted_node = weighted_node;
     this->first_node = this->last_node = nullptr;
     this->number_edges = 0;
+    adjacencia = new list<int>[order];
 
 }
 
@@ -123,6 +124,8 @@ void Graph::insertEdge(int id, int target_id, float weight)
     Edge edge(id, target_id, weight); //cria aresta com as configurações dadas
     edges.push_back(edge); // preenche o vetor de arestas
 
+    // a lista de adjacencia e montada adicionando o vertice alvo no array referente ao vertice origem
+    adjacencia[id].push_back(target_id);
 
     Node *node, *target_node;
     node = getNode(id);
@@ -372,8 +375,38 @@ float Graph::dijkstra(int idSource, int idTarget)
 }
 
 //function that prints a topological sorting
-void topologicalSorting()
-{
+void Graph::topologicalSorting(Graph *graph){
+    stack<int> pilhaTopologica;
+    int tamGrafo = graph->getOrder();
+    vector<bool> nosVisitados(tamGrafo, false);
+
+    for (int i = 0; i < tamGrafo; i++){
+        if (nosVisitados[i] == false){
+            auxTopologicalSorting(i, nosVisitados, pilhaTopologica);
+        }
+    }
+
+    cout << "\nOrdenacao topologica: ";
+    while (pilhaTopologica.empty() == false) {
+        cout << pilhaTopologica.top() << " ";
+        pilhaTopologica.pop();
+    }
+    cout << endl << endl;
+}
+
+//função recursiva auxiliar a topologicalSort
+void Graph::auxTopologicalSorting(int index, vector<bool>& nosVisitados, stack<int>& pilhaTopologica) {
+    nosVisitados[index] = true;
+
+    // busco todos os vertices adjacentes ao index
+    list<int>::iterator i;
+    for (i = adjacencia[index].begin(); i != adjacencia[index].end(); ++i){
+        if (!nosVisitados[*i]){
+            auxTopologicalSorting(*i, nosVisitados, pilhaTopologica);
+        }
+    }
+
+    pilhaTopologica.push(index);
 }
 
 void breadthFirstSearch(ofstream &output_file)
