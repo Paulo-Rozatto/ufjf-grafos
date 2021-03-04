@@ -33,7 +33,7 @@ Graph::Graph(int order, bool directed, bool weighted_edge, bool weighted_node)
     this->weighted_node = weighted_node;
     this->first_node = this->last_node = nullptr;
     this->number_edges = 0;
-    adjacencia = new list<int>[order];
+    adjacencia = new list<int>[order + 1];
 
 }
 
@@ -429,7 +429,7 @@ float Graph::dijkstra(int idSource, int idTarget)
 //function that prints a topological sorting
 void Graph::topologicalSorting(Graph *graph){
     stack<int> pilhaTopologica;
-    int tamGrafo = graph->getOrder();
+    int tamGrafo = graph->getOrder() + 1;
     vector<bool> nosVisitados(tamGrafo, false);
 
     for (int i = 0; i < tamGrafo; i++){
@@ -438,12 +438,18 @@ void Graph::topologicalSorting(Graph *graph){
         }
     }
 
-    cout << "\nOrdenacao topologica: ";
-    while (pilhaTopologica.empty() == false) {
-        cout << pilhaTopologica.top() << " ";
-        pilhaTopologica.pop();
+    cout << "\nOrdenacao topologica:" << endl << "< ";
+
+    while (pilhaTopologica.empty() == false && pilhaTopologica.top() != 0) {
+        if(pilhaTopologica.size() > 2){
+            cout << pilhaTopologica.top() << ", ";
+            pilhaTopologica.pop();
+        }else{
+            cout << pilhaTopologica.top() << " ";
+            pilhaTopologica.pop();}
+
     }
-    cout << endl << endl;
+    cout << ">" << endl << endl;
 }
 
 //função recursiva auxiliar a topologicalSort
