@@ -365,9 +365,10 @@ float Graph::floydMarshall(int idSource, int idTarget)
     return matDistancias[idSource - 1][idTarget - 1];
 }
 
-float Graph::dijkstra(int idSource, int idTarget)
+float Graph::dijkstra(int idSource, int idTarget, ofstream &output_file)
 {
-    float pi[order];        // vetor que guarda a soma dos custos
+    float pi[order];        // vetor que guarda a soma dos custos;
+    int prev[order];        // vetor para guardar o id do vertice anterior no caminho minimo;
     MinHeap s_barra(order); // Heap minima para ser S-barra
     MinHeapNode *minNode;   // No da heap que guarda id do vertice e soma dos custos;
     Node *node;
@@ -389,58 +390,56 @@ float Graph::dijkstra(int idSource, int idTarget)
         return INT_MAX;
     }
 
+    // define peso infinito como metade do valor maximo de inteiro, sendo que é metade para evitar overflow
+    int infinity = INT_MAX / 2;
+
     // inicializa s_barra e pi
     node = first_node;
-    int a = INT_MAX / 2;
     for (int i = 0; i < order; i++)
     {
-        if (node->getId() == idSource)
-        {
-            pi[i] = 0;
-            s_barra.insertKey(new MinHeapNode(node->getId(), 0));
-        }
-        else
-        {
-            pi[i] = a; //INT_MAX;
-            s_barra.insertKey(new MinHeapNode(node->getId(), a));
-        }
+        pi[node->getId()] = infinity;
+        s_barra.insertKey(new MinHeapNode(node->getId(), infinity));
         node = node->getNextNode();
     }
+    pi[idSource] = 0;
+    s_barra.decreaseKey(idSource, 0);
+
+    int prevId = -1;
+    prev[idSource] = prevId;
 
     while (!s_barra.isEmpty())
     {
         // Remove o elemento com o menor peso de S-barra
         minNode = s_barra.extractMin();
+        prevId = minNode->getId();
 
-        // Procura o elememento extraido na lista do grafo e salva o seu indice na variavel j para ser usado no vetor de distancias
-        int j = 0;
+        // Procura o elememento extraido na lista do grafo
         for (node = first_node; node->getId() != minNode->getId(); node = node->getNextNode())
-            j++;
+            ;
 
         edge = node->getFirstEdge();
         while (edge != nullptr)
         {
-            int pi_estrela = pi[j] + edge->getWeight();
+            int pi_estrela = pi[minNode->getId()] + edge->getWeight();
 
-            // Procura o vertice adjacente a j na lista e salva seu indice na variavel k
-            int k = 0;
-            for (node = first_node; node->getId() != edge->getTargetId(); node = node->getNextNode())
-                k++;
+            // Salvando target id em uma varivel pra deixar mais legivell o codigo
+            int edgeTargetId = edge->getTargetId();
 
-            if (pi_estrela < pi[k])
+            if (pi_estrela < pi[edgeTargetId])
             {
-                pi[k] = pi_estrela;
+                pi[edgeTargetId] = pi_estrela;
+                prev[edgeTargetId] = prevId;
 
-                // pega o indice de k na heap de s_barra, caso seja -1, k nao esta em s barra
-                int idx = s_barra.getIndexOf(node->getId());
-                // se k nao estiver em s_barra, o adcione, se estiver atualize a soma de custos
+                // pega o indice de edgeTargetId na heap de s_barra, caso seja -1, edgeTargetId nao esta em s barra
+                int idx = s_barra.getIndexOf(edgeTargetId);
+                // se edgeTargetId nao estiver em s_barra, o adcione, se estiver atualize a soma de custos
                 if (idx == -1)
                 {
-                    s_barra.insertKey(new MinHeapNode(node->getId(), pi[k]));
+                    s_barra.insertKey(new MinHeapNode(edgeTargetId, pi[edgeTargetId]));
                 }
                 else
                 {
-                    s_barra.decreaseKey(idx, pi[k]);
+                    s_barra.decreaseKey(idx, pi[edgeTargetId]);
                 }
             }
 
@@ -450,11 +449,17 @@ float Graph::dijkstra(int idSource, int idTarget)
         delete minNode;
     }
 
-    int i = 0;
-    for (node = first_node; node->getId() != idTarget; node = node->getNextNode())
-        i++;
+    int prevNode = idTarget;
+    output_file << "graph caminho_minimo{" << endl;
 
-    return pi[i];
+    for (int node = prev[idTarget]; node != -1; node = prev[node])
+    {
+        output_file << prevNode << " -- " << node << endl;
+        prevNode = node;
+    }
+    output_file << "}";
+
+    return pi[idTarget];
 }
 
 //function that prints a topological sorting

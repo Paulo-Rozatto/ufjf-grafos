@@ -296,7 +296,7 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
         cin >> source;
         cout << "Digite o id do vértice de destino: ";
         cin >> target;
-        cout << "Comprimento do caminho minimo: " << graph->dijkstra(source, target) << endl;
+        cout << "Comprimento do caminho minimo: " << graph->dijkstra(source, target, output_file) << endl;
         break;
     }
 
