@@ -264,7 +264,7 @@ float Graph::floydMarshall(int idSource, int idTarget)
     // se pelo menos um dos vertices passados por parametro nao existir no grafo, retorna infinito e exibe mensagem
     if (!isSource || !isTarget)
     {
-        cout << "Entrada invÃ¡lida!" << endl;
+        cout << "Entrada invalida!" << endl;
         return INT_MAX;
     }
 
@@ -272,6 +272,36 @@ float Graph::floydMarshall(int idSource, int idTarget)
 
     // uma matriz quadrada de distancias entre os vertices
     float matDistancias[order][order];
+
+    // inicializa a matriz com os maiores valores possiveis
+    for(int i = 0; i < order; i++)
+    {
+        for(int j = 0; j < order; j++)
+        {
+                matDistancias[i][j] = INT_MAX;
+        }
+    }
+
+    // variaveis auxiliares para o preenchimento da matriz
+    Node *x; //percorrerá os nós do grafo
+    Edge *y; //percorrera as arestas do grafo
+    int z; //indicara o Id do nó de chegada da aresta
+    x = first_node;
+    y = x->getFirstEdge();
+    z = y->getTargetId();
+
+    // preenche a matriz com os valores ja oferecidos
+    for(x=first_node; x!=nullptr; x=x->getNextNode())
+    {
+        for(y=x->getFirstEdge(); y!=x->getLastEdge(); y=y->getNextEdge())
+        {
+                z = y->getTargetId();
+                matDistancias[x->getId()-1][z-1] = y->getWeight();
+        }
+        y=x->getLastEdge();
+        z=y->getTargetId();
+        matDistancias[x->getId()-1][z-1] = y->getWeight();
+    }
 
     // elementos que representam a distancia de um vertice para ele mesmo inicializados como zero na matriz
     for(int i = 0; i < order; i++)
@@ -283,37 +313,6 @@ float Graph::floydMarshall(int idSource, int idTarget)
         }
     }
 
-    // algoritmo de leitura nao pega um terceiro parametro (peso) de entrada.txt; Aqui se faz necessaria a inserÃ§ao manual das arestas:
-    matDistancias[0][1]= 7;
-    matDistancias[0][2]= 1;
-    matDistancias[0][3]= INT_MAX;
-    matDistancias[0][4]= INT_MAX;
-    matDistancias[0][5]= INT_MAX;
-    matDistancias[1][0]= 7;
-    matDistancias[1][2]= 5;
-    matDistancias[1][3]= 4;
-    matDistancias[1][4]= 2;
-    matDistancias[1][5]= 1;
-    matDistancias[2][0]= 1;
-    matDistancias[2][1]= 5;
-    matDistancias[2][3]= INT_MAX;
-    matDistancias[2][4]= 2;
-    matDistancias[2][5]= 7;
-    matDistancias[3][0]= INT_MAX;
-    matDistancias[3][1]= 4;
-    matDistancias[3][2]= INT_MAX;
-    matDistancias[3][4]= 5;
-    matDistancias[3][5]= INT_MAX;
-    matDistancias[4][0]= INT_MAX;
-    matDistancias[4][1]= 2;
-    matDistancias[4][2]= 2;
-    matDistancias[4][3]= 5;
-    matDistancias[4][5]= 3;
-    matDistancias[5][0]= INT_MAX;
-    matDistancias[5][1]= 1;
-    matDistancias[5][2]= 7;
-    matDistancias[5][3]= INT_MAX;
-    matDistancias[5][4]= 3;
 
     // alagoritmo de Floyd que varre a matriz inicial com apenas os pesos das arestas entre vertices adjacentes e modiifca para o caminho minimo entre dois vertices quaisquer do grafo
     for (int k=0; k<order; k++)
@@ -327,6 +326,7 @@ float Graph::floydMarshall(int idSource, int idTarget)
              }
         }
     }
+
     // retorna a distancia entre os dois vertices escolhidos, que estao subtraidos a 1 para serem representados na matriz
     return matDistancias[idSource-1][idTarget-1];
 
