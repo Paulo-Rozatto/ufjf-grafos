@@ -21,6 +21,19 @@ Node::Node(int id)
     this->next_node = nullptr;
 };
 
+Node::Node(int id, int group)
+{
+
+    this->id = id;
+    this->group = group;
+    this->in_degree = 0;
+    this->out_degree = 0;
+    this->weight = 0;
+    this->first_edge = nullptr;
+    this->last_edge = nullptr;
+    this->next_node = nullptr;
+}
+
 // Destructor
 Node::~Node()
 {
@@ -71,6 +84,16 @@ float Node::getWeight()
 {
 
     return this->weight;
+}
+
+int Node::getGroup()
+{
+    return this->group;
+}
+
+void Node::setGroup(int group)
+{
+    this->group = group;
 }
 
 Node *Node::getNextNode()
@@ -228,4 +251,3 @@ Edge *Node::hasEdgeBetween(int target_id)
     }
     return nullptr;
 }
-

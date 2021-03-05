@@ -20,7 +20,6 @@ Graph *leitura(ifstream &input_file, int directed, int weightedEdge, int weighte
     int idNodeTarget;
     int order;
 
-
     //Pegando a ordem do grafo
     input_file >> order;
 
@@ -29,11 +28,10 @@ Graph *leitura(ifstream &input_file, int directed, int weightedEdge, int weighte
 
     //Leitura de arquivo
 
-
     if (!graph->getWeightedEdge() && !graph->getWeightedNode())
     {
 
-        while (input_file >> idNodeSource >> idNodeTarget )
+        while (input_file >> idNodeSource >> idNodeTarget)
         {
             if (!graph->searchNode(idNodeSource))
                 graph->insertNode(idNodeSource);
@@ -93,62 +91,134 @@ Graph *leitura(ifstream &input_file, int directed, int weightedEdge, int weighte
     return graph;
 }
 
-Graph *leituraInstancia(ifstream &input_file, int directed, int weightedEdge, int weightedNode)
+Graph *leituraComGrupos(ifstream &input_file, int directed, int weightedEdge, int weightedNode)
 {
 
     //Variáveis para auxiliar na criação dos nós no Grafo
     int idNodeSource;
     int idNodeTarget;
-    int order;
     int numEdges;
+    int id = 0;
+    string cluster;
 
-    //Pegando a ordem do grafo
-    input_file >> order >> numEdges;
-
-    //Criando objeto grafo
-    Graph *graph = new Graph(order, directed, weightedEdge, weightedNode);
+    // Criando objeto grafo
+    Graph *graph = new Graph(0, directed, weightedEdge, weightedNode);
 
     //Leitura de arquivo
-    while (input_file >> idNodeSource >> idNodeTarget)
+    // while (input_file >> cluster)
+    while (getline(input_file, cluster))
     {
-        if (!graph->searchNode(idNodeSource))
-            graph->insertNode(idNodeSource);
-        if (!graph->searchNode(idNodeTarget))
-            graph->insertNode(idNodeTarget);
-        graph->insertEdge(idNodeSource, idNodeTarget, 0);
+        if (cluster == "" || cluster[0] == '\r')
+        {
+            break;
+        }
+        graph->insertNode(id, stoi(cluster));
+        id++;
+    }
+
+    if (!graph->getWeightedEdge() && !graph->getWeightedNode())
+    {
+
+        while (input_file >> idNodeSource >> idNodeTarget)
+        {
+            if (!graph->searchNode(idNodeSource) || !graph->searchNode(idNodeTarget))
+            {
+                cout << "Error: trying to add edge to a non-existent vetex" << endl;
+                exit(1);
+            }
+            graph->insertEdge(idNodeSource, idNodeTarget, 0);
+        }
+    }
+    else if (graph->getWeightedEdge() && !graph->getWeightedNode())
+    {
+
+        float edgeWeight;
+
+        while (input_file >> idNodeSource >> idNodeTarget >> edgeWeight)
+        {
+
+            if (!graph->searchNode(idNodeSource) || !graph->searchNode(idNodeTarget))
+            {
+                cout << "Error: trying to add edge to a non-existent vetex" << endl;
+                exit(1);
+            }
+            graph->insertEdge(idNodeSource, idNodeTarget, edgeWeight);
+        }
+    }
+    else if (graph->getWeightedNode() && !graph->getWeightedEdge())
+    {
+
+        float nodeSourceWeight, nodeTargetWeight;
+
+        while (input_file >> idNodeSource >> nodeSourceWeight >> idNodeTarget >> nodeTargetWeight)
+        {
+            if (!graph->searchNode(idNodeSource) || !graph->searchNode(idNodeTarget))
+            {
+                cout << "Error: trying to add edge to a non-existent vetex" << endl;
+                exit(1);
+            }
+            graph->insertEdge(idNodeSource, idNodeTarget, 0);
+            graph->getNode(idNodeSource)->setWeight(nodeSourceWeight);
+            graph->getNode(idNodeTarget)->setWeight(nodeTargetWeight);
+        }
+    }
+    else if (graph->getWeightedNode() && graph->getWeightedEdge())
+    {
+
+        float nodeSourceWeight, nodeTargetWeight, edgeWeight;
+
+        while (input_file >> idNodeSource >> nodeSourceWeight >> idNodeTarget >> nodeTargetWeight >> edgeWeight)
+        {
+            if (!graph->searchNode(idNodeSource) || !graph->searchNode(idNodeTarget))
+            {
+                cout << "Error: trying to add edge to a non-existent vetex" << endl;
+                exit(1);
+            }
+            graph->insertEdge(idNodeSource, idNodeTarget, edgeWeight);
+            graph->getNode(idNodeSource)->setWeight(nodeSourceWeight);
+            graph->getNode(idNodeTarget)->setWeight(nodeTargetWeight);
+        }
     }
 
     return graph;
 }
 
-void escrita(Graph *graph, ofstream &output_file){
-    if(graph != nullptr){
+void escrita(Graph *graph, ofstream &output_file)
+{
+    if (graph != nullptr)
+    {
         Node *auxNode = graph->getFirstNode();
         Edge *auxEdge;
         int tam = graph->getOrder();
-        if(graph->getDirected()){
+        if (graph->getDirected())
+        {
             output_file << "strict digraph grafo{" << endl;
-            for(int i = 0; i < tam; i++){
+            for (int i = 0; i < tam; i++)
+            {
                 auxEdge = auxNode->getFirstEdge();
                 int cont = 0;
-                while((cont < (auxNode->getOutDegree() + auxNode->getInDegree())) && auxEdge != nullptr){
-                    output_file << "\t" <<  auxNode->getId() << " -> " << auxEdge->getTargetId() << ";" << endl;
+                while ((cont < (auxNode->getOutDegree() + auxNode->getInDegree())) && auxEdge != nullptr)
+                {
+                    output_file << "\t" << auxNode->getId() << " -> " << auxEdge->getTargetId() << ";" << endl;
                     auxEdge = auxEdge->getNextEdge();
-                    cont ++;
+                    cont++;
                 }
                 auxNode = auxNode->getNextNode();
             }
             output_file << "}" << endl;
         }
-        else{
-           output_file << "strict graph grafo{" << endl;
-            for(int i = 0; i < tam; i++){
+        else
+        {
+            output_file << "strict graph grafo{" << endl;
+            for (int i = 0; i < tam; i++)
+            {
                 auxEdge = auxNode->getFirstEdge();
                 int cont = 0;
-                while((cont < (auxNode->getOutDegree() + auxNode->getInDegree())) && auxEdge != nullptr){
-                    output_file << "\t" <<  auxNode->getId() << " -- " << auxEdge->getTargetId() << ";" << endl;
+                while ((cont < (auxNode->getOutDegree() + auxNode->getInDegree())) && auxEdge != nullptr)
+                {
+                    output_file << "\t" << auxNode->getId() << " -- " << auxEdge->getTargetId() << ";" << endl;
                     auxEdge = auxEdge->getNextEdge();
-                    cont ++;
+                    cont++;
                 }
                 auxNode = auxNode->getNextNode();
             }
@@ -195,7 +265,7 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
         cin >> x;
         int vertices[x];
         cout << "Digite os vertices: ";
-        for(int i = 0; i < x; i++)
+        for (int i = 0; i < x; i++)
         {
             cin >> vertices[i];
         }
@@ -203,14 +273,14 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
         Node *node = graph->getFirstNode();
         cout << "vertices grafo original: ";
 
-        while(node != nullptr)
+        while (node != nullptr)
         {
             cout << node->getId();
             node = node->getNextNode();
         }
         cout << endl;
         cout << "vertices grafo induzido: ";
-        for(Node *node = g->getFirstNode(); node != nullptr; node = node->getNextNode())
+        for (Node *node = g->getFirstNode(); node != nullptr; node = node->getNextNode())
         {
             cout << node->getId();
         }
@@ -244,7 +314,6 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
         break;
     }
 
-
     case 4:
     {
 
@@ -259,8 +328,6 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
         graph->agmKuskal(graph);
         break;
     }
-
-
 
         //Busca em largura;
     case 6:
@@ -312,7 +379,7 @@ int main(int argc, char const *argv[])
 {
 
     //Verificação se todos os parâmetros do programa foram entrados
-    if (argc != 6)
+    if (argc < 6 || argc > 7)
     {
 
         cout << "ERROR: Expecting: ./<program_name> <input_file> <output_file> <directed> <weighted_edge> <weighted_node> " << endl;
@@ -339,7 +406,14 @@ int main(int argc, char const *argv[])
 
     if (input_file.is_open())
     {
-        graph = leitura(input_file, atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
+        if (argc == 7 && atoi(argv[6]))
+        {
+            graph = leituraComGrupos(input_file, atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
+        }
+        else
+        {
+            graph = leitura(input_file, atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
+        }
     }
     else
         cout << "Unable to open " << argv[1];

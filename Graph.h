@@ -19,9 +19,11 @@ class Graph
 private:
     int order;
     int number_edges;
+    int number_groups;
     bool directed;
     bool weighted_edge;
     bool weighted_node;
+    int node_cont;
     Node *first_node;
     Node *last_node;
 
@@ -40,6 +42,7 @@ public:
     Node *getLastNode();
     //Other methods
     void insertNode(int id);
+    void insertNode(int id, int group);
     void insertEdge(int id, int target_id, float weight);
     void removeNode(int id);
     bool searchNode(int id);
@@ -60,7 +63,6 @@ public:
     float greedRactiveRandom();
 
 private:
-
 };
 
 #endif // GRAPH_H_INCLUDED

@@ -33,10 +33,10 @@ Graph::Graph(int order, bool directed, bool weighted_edge, bool weighted_node)
     this->weighted_node = weighted_node;
     this->first_node = this->last_node = nullptr;
     this->number_edges = 0;
-
+    this->node_cont = 0;
 }
 
-    vector<Edge> edges; //vetor das arestas
+vector<Edge> edges; //vetor das arestas
 
 // Destructor
 Graph::~Graph()
@@ -114,15 +114,40 @@ void Graph::insertNode(int id)
         last_node = node;
     }
 
-//    order++;
+    node_cont++;
 
+    if (node_cont > order)
+    {
+        order++;
+    }
+}
+
+void Graph::insertNode(int id, int group)
+{
+    Node *node = new Node(id, group);
+
+    if (first_node == nullptr)
+    {
+        first_node = last_node = node;
+    }
+    else
+    {
+        last_node->setNextNode(node);
+        last_node = node;
+    }
+
+    node_cont++;
+
+    if (node_cont > order)
+    {
+        order++;
+    }
 }
 
 void Graph::insertEdge(int id, int target_id, float weight)
 {
-    Edge edge(id, target_id, weight); //cria aresta com as configurações dadas
-    edges.push_back(edge); // preenche o vetor de arestas
-
+    Edge edge(id, target_id, weight); //cria aresta com as configuraï¿½ï¿½es dadas
+    edges.push_back(edge);            // preenche o vetor de arestas
 
     Node *node, *target_node;
     node = getNode(id);
@@ -141,7 +166,6 @@ void Graph::insertEdge(int id, int target_id, float weight)
             {
                 node->incrementOutDegree();
                 target_node->incrementInDegree();
-
             }
             else
             {
@@ -149,14 +173,12 @@ void Graph::insertEdge(int id, int target_id, float weight)
                 target_node->insertEdge(id, weight);
                 target_node->incrementOutDegree();
             }
-
         }
     }
 }
 
 void Graph::removeNode(int id)
 {
-
 }
 
 bool Graph::searchNode(int id)
@@ -192,58 +214,70 @@ Node *Graph::getNode(int id)
 
 void Graph::breadthFirstSearch(ofstream &output_file)
 {
-    int tam = this->getOrder();//número de nós visitados
-    bool *visitados = new bool[tam];//vetor que guarda se o vértcie foi visitado
-    vector<Node*> nos(tam);//vetor que armazena o endereço de todos os nós
-    queue<Node*> fila;//fila auxilar na ordem de visitação
-    vector<Edge*> tree;//árvore gerada pelo algoritmo de busca em largura
-    Node *auxNode = this->getFirstNode();//nó auxiliar
-    Edge *auxEdge;//aresta auxiliar
-    for(int i = 0; i < tam; i++){//iniciando visitados
+    int tam = this->getOrder();           //nï¿½mero de nï¿½s visitados
+    bool *visitados = new bool[tam];      //vetor que guarda se o vï¿½rtcie foi visitado
+    vector<Node *> nos(tam);              //vetor que armazena o endereï¿½o de todos os nï¿½s
+    queue<Node *> fila;                   //fila auxilar na ordem de visitaï¿½ï¿½o
+    vector<Edge *> tree;                  //ï¿½rvore gerada pelo algoritmo de busca em largura
+    Node *auxNode = this->getFirstNode(); //nï¿½ auxiliar
+    Edge *auxEdge;                        //aresta auxiliar
+    for (int i = 0; i < tam; i++)
+    { //iniciando visitados
         *(visitados + i) = false;
         nos[auxNode->getId()] = auxNode;
         auxNode = auxNode->getNextNode();
     }
-    fila.push(nos[0]);//inciando a partir do vértice de índice 0
+    fila.push(nos[0]); //inciando a partir do vï¿½rtice de ï¿½ndice 0
     *(visitados + fila.front()->getId()) = true;
-    while(!fila.empty() && tree.size() != (tam-1)){
+    while (!fila.empty() && tree.size() != (tam - 1))
+    {
         auxNode = fila.front();
         fila.pop();
         auxEdge = auxNode->getFirstEdge();
         int cont = 0;
-        while((cont < (auxNode->getOutDegree() + auxNode->getInDegree())) && auxEdge != nullptr){//adiciona todos os nós visihos não visitados
-            if(*(visitados + auxEdge->getTargetId()) == false){
+        while ((cont < (auxNode->getOutDegree() + auxNode->getInDegree())) && auxEdge != nullptr)
+        { //adiciona todos os nï¿½s visihos nï¿½o visitados
+            if (*(visitados + auxEdge->getTargetId()) == false)
+            {
                 *(visitados + auxEdge->getTargetId()) = true;
-                fila.push(nos[auxEdge->getTargetId()]);//atualiza a ordem de inserção
+                fila.push(nos[auxEdge->getTargetId()]); //atualiza a ordem de inserï¿½ï¿½o
                 Edge *galho = new Edge(auxNode->getId(), auxEdge->getTargetId(), auxEdge->getWeight());
                 tree.push_back(galho);
-                if(tree.size() == (tam-1))
+                if (tree.size() == (tam - 1))
                     break;
             }
             auxEdge = auxEdge->getNextEdge();
-            cont ++;
+            cont++;
         }
     }
     float weightResult = 0;
-    cout << endl << "Busca em Largura" << endl << endl;
-    if(this->getDirected()){
+    cout << endl
+         << "Busca em Largura" << endl
+         << endl;
+    if (this->getDirected())
+    {
         output_file << "digraph busca{" << endl;
-        for(int i = 0;  i < tree.size(); i++){
+        for (int i = 0; i < tree.size(); i++)
+        {
             cout << "(" << tree[i]->getOriginId() << ", " << tree[i]->getTargetId() << ") - peso = " << tree[i]->getWeight() << endl;
             weightResult += tree[i]->getWeight();
             output_file << "\t" << tree[i]->getOriginId() << " -> " << tree[i]->getTargetId() << ";" << endl;
         }
     }
-    else{
+    else
+    {
         output_file << "graph busca{" << endl;
-        for(int i = 0;  i < tree.size(); i++){
+        for (int i = 0; i < tree.size(); i++)
+        {
             cout << "(" << tree[i]->getOriginId() << ", " << tree[i]->getTargetId() << ") - peso = " << tree[i]->getWeight() << endl;
             weightResult += tree[i]->getWeight();
             output_file << "\t" << tree[i]->getOriginId() << " -- " << tree[i]->getTargetId() << ";" << endl;
         }
     }
     output_file << "}" << endl;
-    cout << endl << "Peso total da arvore: " << weightResult << endl << endl;
+    cout << endl
+         << "Peso total da arvore: " << weightResult << endl
+         << endl;
 }
 
 float Graph::floydMarshall(int idSource, int idTarget)
@@ -274,62 +308,61 @@ float Graph::floydMarshall(int idSource, int idTarget)
     float matDistancias[order][order];
 
     // elementos que representam a distancia de um vertice para ele mesmo inicializados como zero na matriz
-    for(int i = 0; i < order; i++)
+    for (int i = 0; i < order; i++)
     {
-        for(int j = 0; j < order; j++)
+        for (int j = 0; j < order; j++)
         {
-            if(i == j)
+            if (i == j)
                 matDistancias[i][j] = 0;
         }
     }
 
     // algoritmo de leitura nao pega um terceiro parametro (peso) de entrada.txt; Aqui se faz necessaria a inserÃ§ao manual das arestas:
-    matDistancias[0][1]= 7;
-    matDistancias[0][2]= 1;
-    matDistancias[0][3]= INT_MAX;
-    matDistancias[0][4]= INT_MAX;
-    matDistancias[0][5]= INT_MAX;
-    matDistancias[1][0]= 7;
-    matDistancias[1][2]= 5;
-    matDistancias[1][3]= 4;
-    matDistancias[1][4]= 2;
-    matDistancias[1][5]= 1;
-    matDistancias[2][0]= 1;
-    matDistancias[2][1]= 5;
-    matDistancias[2][3]= INT_MAX;
-    matDistancias[2][4]= 2;
-    matDistancias[2][5]= 7;
-    matDistancias[3][0]= INT_MAX;
-    matDistancias[3][1]= 4;
-    matDistancias[3][2]= INT_MAX;
-    matDistancias[3][4]= 5;
-    matDistancias[3][5]= INT_MAX;
-    matDistancias[4][0]= INT_MAX;
-    matDistancias[4][1]= 2;
-    matDistancias[4][2]= 2;
-    matDistancias[4][3]= 5;
-    matDistancias[4][5]= 3;
-    matDistancias[5][0]= INT_MAX;
-    matDistancias[5][1]= 1;
-    matDistancias[5][2]= 7;
-    matDistancias[5][3]= INT_MAX;
-    matDistancias[5][4]= 3;
+    matDistancias[0][1] = 7;
+    matDistancias[0][2] = 1;
+    matDistancias[0][3] = INT_MAX;
+    matDistancias[0][4] = INT_MAX;
+    matDistancias[0][5] = INT_MAX;
+    matDistancias[1][0] = 7;
+    matDistancias[1][2] = 5;
+    matDistancias[1][3] = 4;
+    matDistancias[1][4] = 2;
+    matDistancias[1][5] = 1;
+    matDistancias[2][0] = 1;
+    matDistancias[2][1] = 5;
+    matDistancias[2][3] = INT_MAX;
+    matDistancias[2][4] = 2;
+    matDistancias[2][5] = 7;
+    matDistancias[3][0] = INT_MAX;
+    matDistancias[3][1] = 4;
+    matDistancias[3][2] = INT_MAX;
+    matDistancias[3][4] = 5;
+    matDistancias[3][5] = INT_MAX;
+    matDistancias[4][0] = INT_MAX;
+    matDistancias[4][1] = 2;
+    matDistancias[4][2] = 2;
+    matDistancias[4][3] = 5;
+    matDistancias[4][5] = 3;
+    matDistancias[5][0] = INT_MAX;
+    matDistancias[5][1] = 1;
+    matDistancias[5][2] = 7;
+    matDistancias[5][3] = INT_MAX;
+    matDistancias[5][4] = 3;
 
     // alagoritmo de Floyd que varre a matriz inicial com apenas os pesos das arestas entre vertices adjacentes e modiifca para o caminho minimo entre dois vertices quaisquer do grafo
-    for (int k=0; k<order; k++)
+    for (int k = 0; k < order; k++)
     {
-        for (i=0; i<order; i++)
+        for (i = 0; i < order; i++)
         {
-             for (j=0; j<order; j++)
-             {
-                  if (matDistancias[i][j] > matDistancias[i][k]+matDistancias[k][j])
-                    matDistancias[i][j] = matDistancias[i][k]+matDistancias[k][j];
-             }
+            for (j = 0; j < order; j++)
+            {
+                if (matDistancias[i][j] > matDistancias[i][k] + matDistancias[k][j])
+                    matDistancias[i][j] = matDistancias[i][k] + matDistancias[k][j];
+            }
         }
     }
     // retorna a distancia entre os dois vertices escolhidos, que estao subtraidos a 1 para serem representados na matriz
-    return matDistancias[idSource-1][idTarget-1];
-
+    return matDistancias[idSource - 1][idTarget - 1];
 }
 
 float Graph::dijkstra(int idSource, int idTarget)
@@ -352,12 +385,13 @@ float Graph::dijkstra(int idSource, int idTarget)
     // se pelo menos um dos vertices passados por parametro nao existir no grafo, retorna infinito e exibe mensagem
     if (!isSource || !isTarget)
     {
-        cout << "Entrada invÃ¡lida!" << endl;
+        std::cout << "Entrada invÃ¡lida!" << endl;
         return INT_MAX;
     }
 
     // inicializa s_barra e pi
     node = first_node;
+    int a = INT_MAX / 2;
     for (int i = 0; i < order; i++)
     {
         if (node->getId() == idSource)
@@ -367,8 +401,8 @@ float Graph::dijkstra(int idSource, int idTarget)
         }
         else
         {
-            pi[i] = INT_MAX;
-            s_barra.insertKey(new MinHeapNode(node->getId(), INT_MAX));
+            pi[i] = a; //INT_MAX;
+            s_barra.insertKey(new MinHeapNode(node->getId(), a));
         }
         node = node->getNextNode();
     }
@@ -430,29 +464,28 @@ void topologicalSorting()
 
 void breadthFirstSearch(ofstream &output_file)
 {
-
 }
 
-Graph* Graph::getVertexInduced(int *listIdNodes, Graph &graph, int x)
+Graph *Graph::getVertexInduced(int *listIdNodes, Graph &graph, int x)
 {
-    //cria uma copia do grafo original para serem feitas as operações
+    //cria uma copia do grafo original para serem feitas as operaï¿½ï¿½es
     Graph *g1 = new Graph(graph);
     Node *node = graph.getFirstNode();
 
     //percorre o grafo em busca dos nos passados pelo array por parametro
-    while(node != nullptr)
+    while (node != nullptr)
     {
         bool verifica = false;
 
-        for(int i = 0; i < x; i++)
+        for (int i = 0; i < x; i++)
         {
-            if(node->getId() == listIdNodes[i])
+            if (node->getId() == listIdNodes[i])
             {
                 verifica = true;
             }
         }
-        //exclui o nó do grafo copia para transformar ele em subgrafo induzido
-        if(!verifica)
+        //exclui o nï¿½ do grafo copia para transformar ele em subgrafo induzido
+        if (!verifica)
         {
             g1->removeNode(node->getId());
         }
@@ -460,44 +493,47 @@ Graph* Graph::getVertexInduced(int *listIdNodes, Graph &graph, int x)
     }
     //retorna o subgrafo induzido
     return g1;
-
 }
 
-/// As funções "searchForSubset" e "join" tendem a detectar os ciclos em grafos NÃO direcionados. Condição fundamental
+/// As funï¿½ï¿½es "searchForSubset" e "join" tendem a detectar os ciclos em grafos Nï¿½O direcionados. Condiï¿½ï¿½o fundamental
 /// na montagem do algoritmo de Kruskal.
-//essa função busca o subconjunto (subset) do nó "i" de forma recursiva.
-int searchForSubset(int subset[], int i){
-    if(subset[i] == -1)
+//essa funï¿½ï¿½o busca o subconjunto (subset) do nï¿½ "i" de forma recursiva.
+int searchForSubset(int subset[], int i)
+{
+    if (subset[i] == -1)
         return i;
     return searchForSubset(subset, subset[i]);
 }
-//a função de "join" é unir dois "subsets" (subconjuntos) em 1 único subconjunto.
-void join(int subset[], int v1, int v2){
+//a funï¿½ï¿½o de "join" ï¿½ unir dois "subsets" (subconjuntos) em 1 ï¿½nico subconjunto.
+void join(int subset[], int v1, int v2)
+{
     int v1_set = searchForSubset(subset, v1);
     int v2_set = searchForSubset(subset, v2);
     subset[v1_set] = v2_set;
 }
-Graph *Graph::agmKuskal(Graph *graph){
-    vector<Edge> tree; //vetor para armazenar a solução do problema
+Graph *Graph::agmKuskal(Graph *graph)
+{
+    vector<Edge> tree; //vetor para armazenar a soluï¿½ï¿½o do problema
 
     int size_edges = edges.size();
 
-
-// Ordena as arestas pelo menor peso.
+    // Ordena as arestas pelo menor peso.
     sort(edges.begin(), edges.end());
 
     int V = graph->getOrder();
-    int * subset = new int[V+1];
+    int *subset = new int[V + 1];
 
-//  juntamos todos os subconjuntos em um conjunto próprio. Ex: S={A, B, C, D, E}.
+    //  juntamos todos os subconjuntos em um conjunto prï¿½prio. Ex: S={A, B, C, D, E}.
     memset(subset, -1, sizeof(int) * V);
 
-    for(int i = 0; i < size_edges; i++){
+    for (int i = 0; i < size_edges; i++)
+    {
         int v1 = searchForSubset(subset, edges[i].getOriginId());
         int v2 = searchForSubset(subset, edges[i].getTargetId());
 
-// se forem diferentes, sabemos que não forma ciclo, portanto, inserimos no vetor "tree".
-        if(v1 != v2){
+        // se forem diferentes, sabemos que nï¿½o forma ciclo, portanto, inserimos no vetor "tree".
+        if (v1 != v2)
+        {
             tree.push_back(edges[i]);
             join(subset, v1, v2);
         }
@@ -505,11 +541,12 @@ Graph *Graph::agmKuskal(Graph *graph){
 
     int size_tree = tree.size();
 
-// tem a função de mostrar as arestas selecionadas e seus respectivos pesos, no final, tem-se o custo total.
+    // tem a funï¿½ï¿½o de mostrar as arestas selecionadas e seus respectivos pesos, no final, tem-se o custo total.
     cout << endl;
     cout << "Arvore Geradora Minima usando algoritmo de Kruskal" << endl;
     float weightResult = 0;
-    for(int i = 0; i < size_tree; i++){
+    for (int i = 0; i < size_tree; i++)
+    {
         int v1 = tree[i].getOriginId();
         int v2 = tree[i].getTargetId();
         int w = tree[i].getWeight();
@@ -518,19 +555,19 @@ Graph *Graph::agmKuskal(Graph *graph){
     }
     cout << "Peso total do arvore: " << weightResult << endl;
     cout << endl;
-
 }
 Graph *Graph::agmPrim()
 {
-    int tam = this->getOrder();//armazena número de vértices.
-    int prox[tam];//armazena o id do vértice mais próximo que ainda não foi inserido na solução
+    int tam = this->getOrder(); //armazena nï¿½mero de vï¿½rtices.
+    int prox[tam];              //armazena o id do vï¿½rtice mais prï¿½ximo que ainda nï¿½o foi inserido na soluï¿½ï¿½o
     Graph *tree = new Graph(this->getOrder(), this->getDirected(), this->getWeightedEdge(), this->getWeightedNode());
-    vector<Edge> custo; //armazena os menores custos de arestas incidentes na solução.
-    vector<Node*> nos(tam);
+    vector<Edge> custo; //armazena os menores custos de arestas incidentes na soluï¿½ï¿½o.
+    vector<Node *> nos(tam);
     Node *auxNode = this->getFirstNode();
     int primeiro = auxNode->getId();
     Edge *auxEdge;
-    for(int i = 0; i<tam; i++){//Inicia o vetor de custo com valores máximos e preenche o vetor prox.
+    for (int i = 0; i < tam; i++)
+    { //Inicia o vetor de custo com valores mï¿½ximos e preenche o vetor prox.
         prox[i] = primeiro;
         custo.push_back(Edge(i, primeiro, INT_MAX));
         nos[auxNode->getId()] = auxNode;
@@ -539,38 +576,46 @@ Graph *Graph::agmPrim()
     }
     int i, j, k = 0;
     j = (primeiro);
-    while(k < tam){
+    while (k < tam)
+    {
         prox[j] = -1; //atualiza prox.
         auxNode = nos[j];
         auxEdge = auxNode->getFirstEdge();
         int cont = 0;
-        while((cont < (auxNode->getOutDegree() + auxNode->getInDegree())) && auxEdge != nullptr){
-            if(prox[auxEdge->getTargetId()] !=-1 && (custo[auxEdge->getTargetId()].getWeight() > auxEdge->getWeight())){
+        while ((cont < (auxNode->getOutDegree() + auxNode->getInDegree())) && auxEdge != nullptr)
+        {
+            if (prox[auxEdge->getTargetId()] != -1 && (custo[auxEdge->getTargetId()].getWeight() > auxEdge->getWeight()))
+            {
                 custo[auxEdge->getTargetId()] = Edge(auxNode->getId(), auxEdge->getTargetId(), auxEdge->getWeight());
                 prox[auxEdge->getTargetId()] = auxNode->getId();
             }
             auxEdge = auxEdge->getNextEdge();
-            cont ++;
+            cont++;
         }
-        //encontra a aresta j que não faz parte da solução e tem o menor peso.
-        for(i = 0; i < tam; i++)
-            if(prox[i]!=-1){
+        //encontra a aresta j que nï¿½o faz parte da soluï¿½ï¿½o e tem o menor peso.
+        for (i = 0; i < tam; i++)
+            if (prox[i] != -1)
+            {
                 j = i;
                 break;
             }
-        for( ;i < tam; i++)
-            if(prox[i] != -1 && custo[i].getWeight() < custo[j].getWeight())
+        for (; i < tam; i++)
+            if (prox[i] != -1 && custo[i].getWeight() < custo[j].getWeight())
                 j = i;
-        k ++;
+        k++;
     }
     sort(custo.begin(), custo.end());
-    cout << "Arvore Geradora Minima usando algoritmo de Prim" << endl << endl;
+    cout << "Arvore Geradora Minima usando algoritmo de Prim" << endl
+         << endl;
     float weightResult = 0;
-    for(int i = 0; i<tam-1; i++){//Imprime a solução
+    for (int i = 0; i < tam - 1; i++)
+    { //Imprime a soluï¿½ï¿½o
         cout << "(" << custo[i].getOriginId() << ", " << custo[i].getTargetId() << ") - peso = " << custo[i].getWeight() << endl;
         weightResult += custo[i].getWeight();
         tree->insertEdge(custo[i].getOriginId(), custo[i].getTargetId(), custo[i].getWeight());
     }
-    cout << endl << "Peso total da arvore: " << weightResult << endl << endl;
+    cout << endl
+         << "Peso total da arvore: " << weightResult << endl
+         << endl;
     return tree;
 }
