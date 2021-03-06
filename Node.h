@@ -20,13 +20,13 @@ private:
     unsigned int in_degree;
     unsigned int out_degree;
     float weight;
-    int group;
+    int cluster;
     Node *next_node;
 
 public:
     // Constructor
     Node(int id);
-    Node(int id, int group);
+    Node(int id, int cluster);
     // Destructor
     ~Node();
     // Getters
@@ -36,12 +36,12 @@ public:
     int getInDegree();
     int getOutDegree();
     float getWeight();
-    int getGroup();
+    int getCluster();
     Node *getNextNode();
     // Setters
     void setNextNode(Node *node);
     void setWeight(float weight);
-    void setGroup(int group);
+    void setCluster(int cluster);
     // Other methods
     bool searchEdge(int target_id);
     void insertEdge(int target_id, float weight);

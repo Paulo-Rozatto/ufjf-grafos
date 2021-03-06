@@ -44,5 +44,7 @@ public:
     bool isEmpty() { return size == 0; }
 
     int getIndexOf(int id);
+
+    void clear();
 };
 #endif

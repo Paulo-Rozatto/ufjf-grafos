@@ -21,11 +21,11 @@ Node::Node(int id)
     this->next_node = nullptr;
 };
 
-Node::Node(int id, int group)
+Node::Node(int id, int cluster)
 {
 
     this->id = id;
-    this->group = group;
+    this->cluster = cluster;
     this->in_degree = 0;
     this->out_degree = 0;
     this->weight = 0;
@@ -86,14 +86,14 @@ float Node::getWeight()
     return this->weight;
 }
 
-int Node::getGroup()
+int Node::getCluster()
 {
-    return this->group;
+    return this->cluster;
 }
 
-void Node::setGroup(int group)
+void Node::setCluster(int cluster)
 {
-    this->group = group;
+    this->cluster = cluster;
 }
 
 Node *Node::getNextNode()
@@ -148,9 +148,9 @@ void Node::removeAllEdges()
         // Removing all edges of the node
         while (aux != nullptr)
         {
-
             next = aux->getNextEdge();
             delete aux;
+            aux = next;
         }
     }
 

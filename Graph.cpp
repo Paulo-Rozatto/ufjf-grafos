@@ -32,6 +32,7 @@ Graph::Graph(int order, bool directed, bool weighted_edge, bool weighted_node)
     this->weighted_edge = weighted_edge;
     this->weighted_node = weighted_node;
     this->first_node = this->last_node = nullptr;
+    this->first_cluster = nullptr;
     this->number_edges = 0;
     this->node_cont = 0;
 }
@@ -122,9 +123,29 @@ void Graph::insertNode(int id)
     }
 }
 
-void Graph::insertNode(int id, int group)
+Cluster *Graph::getCluster(int id)
 {
-    Node *node = new Node(id, group);
+    Cluster *c = first_cluster;
+
+    while (c != nullptr && c->getId() != id)
+    {
+        c = c->getNextCluster();
+    }
+
+    return c;
+}
+
+void Graph::insertNode(int id, int clusterId)
+{
+    Node *node = new Node(id, clusterId);
+    Cluster *c = getCluster(clusterId);
+
+    if (c == nullptr)
+    {
+        c = insertCluster(clusterId);
+    }
+
+    c->insertElement(node);
 
     if (first_node == nullptr)
     {
@@ -175,6 +196,23 @@ void Graph::insertEdge(int id, int target_id, float weight)
             }
         }
     }
+}
+
+Cluster *Graph::insertCluster(int id)
+{
+    Cluster *c = new Cluster(id);
+    if (first_cluster == nullptr)
+    {
+        first_cluster = c;
+    }
+    else
+    {
+        c->setNextCluster(first_cluster);
+        first_cluster = c;
+    }
+    number_clusters++;
+
+    return c;
 }
 
 void Graph::removeNode(int id)
@@ -623,4 +661,101 @@ Graph *Graph::agmPrim()
          << "Peso total da arvore: " << weightResult << endl
          << endl;
     return tree;
+}
+
+void insertCandidateEdge(Graph *g, MinHeap *candidates, Node *source, bool *visitedClusters)
+{
+    int targetId, targetCluster;
+    float weight = INT_MAX;
+    Edge *edge;
+    Node *node;
+
+    for (edge = g->getNode(source->getId())->getFirstEdge(); edge != nullptr; edge = edge->getNextEdge())
+    {
+        node = g->getNode(edge->getTargetId());
+        if (!visitedClusters[node->getCluster() - 1])
+        {
+            if (edge->getWeight() < weight)
+            {
+                targetId = edge->getTargetId();
+                weight = edge->getWeight();
+                targetCluster = node->getCluster();
+            }
+        }
+    }
+
+    if (weight < INT_MAX)
+    {
+        candidates->insertKey(new MinHeapNode(source->getId(), targetId, weight, targetCluster));
+    }
+}
+
+// Algoritmo guloso para o problema de otmizaçao da árvore geradora mínima generalizada
+// Adaptaçao de PRIM
+Graph *Graph::greed()
+{
+    Graph *minimalTree = nullptr, *tree;
+    int minCost = INT_MAX, currentCost;
+    Cluster *cluster, *currentCluster;
+    MinHeap *candidates;
+    MinHeapNode *minVertex;
+    Node *node;
+    Edge *edge;
+    bool visitedClusters[number_clusters];
+
+    for (cluster = first_cluster; cluster != nullptr; cluster = cluster->getNextCluster())
+    {
+        tree = new Graph(0, directed, weighted_edge, weighted_node);
+
+        for (int i = 0; i < number_clusters; i++)
+        {
+            visitedClusters[i] = false;
+        }
+        visitedClusters[cluster->getId() - 1] = true;
+        currentCluster = cluster;
+        currentCost = 0;
+
+        candidates = new MinHeap(order);
+        // No inicio da execuçao, todos vértices do primeiro grupo podem ter arestas candidatas
+        for (int i = 0; i < currentCluster->getSize(); i++)
+        {
+            insertCandidateEdge(this, candidates, cluster->getElement(i), visitedClusters);
+        }
+
+        for (int i = 1; i < number_clusters; i++)
+        {
+            // inserir arestas de vértices que j­á estao na soluçao como candidatos;
+            for (node = tree->getFirstNode(); node != nullptr; node = node->getNextNode())
+            {
+                insertCandidateEdge(this, candidates, node, visitedClusters);
+            }
+
+            minVertex = candidates->getMin();
+
+            if (minVertex != nullptr)
+            {
+                tree->insertNode(minVertex->getId());
+                tree->insertNode(minVertex->getTargetId());
+                tree->insertEdge(minVertex->getId(), minVertex->getTargetId(), minVertex->getWeight());
+                currentCost += minVertex->getWeight();
+                visitedClusters[minVertex->getTargetCluster() - 1] = true;
+            }
+            delete candidates;
+            candidates = new MinHeap(order);
+        }
+
+        if (currentCost < minCost)
+        {
+            if (minimalTree != nullptr)
+            {
+                delete minimalTree;
+            }
+
+            minimalTree = tree;
+            minCost = currentCost;
+        }
+    }
+
+    cout << "Custo total da árvore: " << minCost << endl;
+    return minimalTree;
 }

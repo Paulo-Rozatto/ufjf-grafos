@@ -99,20 +99,20 @@ Graph *leituraComGrupos(ifstream &input_file, int directed, int weightedEdge, in
     int idNodeTarget;
     int numEdges;
     int id = 0;
-    string cluster;
+    string clusterId;
+    Cluster *cluster;
 
     // Criando objeto grafo
     Graph *graph = new Graph(0, directed, weightedEdge, weightedNode);
 
     //Leitura de arquivo
-    // while (input_file >> cluster)
-    while (getline(input_file, cluster))
+    while (getline(input_file, clusterId))
     {
-        if (cluster == "" || cluster[0] == '\r')
+        if (clusterId == "" || clusterId[0] == '\r')
         {
             break;
         }
-        graph->insertNode(id, stoi(cluster));
+        graph->insertNode(id, stoi(clusterId));
         id++;
     }
 
@@ -340,6 +340,10 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
     {
 
         break;
+    };
+    case 8:
+    {
+        escrita(graph->greed(), output_file);
     }
     case 0:
     {

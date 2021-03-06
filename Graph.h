@@ -6,6 +6,7 @@
 #define GRAPH_H_INCLUDED
 #include "Node.h"
 #include "Edge.h"
+#include "Cluster.h"
 #include <fstream>
 #include <stack>
 #include <list>
@@ -19,13 +20,14 @@ class Graph
 private:
     int order;
     int number_edges;
-    int number_groups;
     bool directed;
     bool weighted_edge;
     bool weighted_node;
     int node_cont;
     Node *first_node;
     Node *last_node;
+    Cluster *first_cluster;
+    int number_clusters;
 
 public:
     //Constructor
@@ -40,10 +42,12 @@ public:
     bool getWeightedNode();
     Node *getFirstNode();
     Node *getLastNode();
+    Cluster *getCluster(int id);
     //Other methods
     void insertNode(int id);
-    void insertNode(int id, int group);
+    void insertNode(int id, int cluster);
     void insertEdge(int id, int target_id, float weight);
+    Cluster *insertCluster(int id);
     void removeNode(int id);
     bool searchNode(int id);
     Node *getNode(int id);
@@ -58,7 +62,7 @@ public:
     float dijkstra(int idSource, int idTarget, ofstream &output_file);
 
     //methods phase1
-    float greed();
+    Graph *greed();
     float greedRandom();
     float greedRactiveRandom();
 
