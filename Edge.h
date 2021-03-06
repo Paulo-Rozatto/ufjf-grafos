@@ -8,34 +8,35 @@
 using namespace std;
 
 // Definition of the Edge class
-class Edge{
+class Edge
+{
 
     // Attributes
-    private:
-        int target_id;
-        int origin_id;
-        Edge* next_edge;
-        float weight;
+private:
+    int target_id;
+    int origin_id;
+    Edge *next_edge;
+    float weight;
 
-    public:
-        // Constructor
-        Edge(int target_id);
-        Edge(int id, int target_id, int weight);
-        // Destructor
-        ~Edge();
-        // Getters
-        int getTargetId();
-        int getOriginId();
-        Edge* getNextEdge();
-        float getWeight();
-        // Setters
-        void setNextEdge(Edge* edge);
-        void setWeight(float weight);
-        // estou sobescrevendo o operador < para ordenar os pesos do maior para o menor
-        bool operator < (const Edge& edge2) const{
-            return(weight < edge2.weight);
-        }
-
+public:
+    // Constructor
+    Edge(int target_id);
+    Edge(int id, int target_id, float weight);
+    // Destructor
+    ~Edge();
+    // Getters
+    int getTargetId();
+    int getOriginId();
+    Edge *getNextEdge();
+    float getWeight();
+    // Setters
+    void setNextEdge(Edge *edge);
+    void setWeight(float weight);
+    // estou sobescrevendo o operador < para ordenar os pesos do maior para o menor
+    bool operator<(const Edge &edge2) const
+    {
+        return (weight < edge2.weight);
+    }
 };
 
 #endif // EDGE_H_INCLUDED

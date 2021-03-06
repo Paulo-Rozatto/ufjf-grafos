@@ -669,6 +669,7 @@ void insertCandidateEdge(Graph *g, MinHeap *candidates, Node *source, bool *visi
     float weight = INT_MAX;
     Edge *edge;
     Node *node;
+    MinHeapNode *min;
 
     for (edge = g->getNode(source->getId())->getFirstEdge(); edge != nullptr; edge = edge->getNextEdge())
     {
@@ -686,7 +687,31 @@ void insertCandidateEdge(Graph *g, MinHeap *candidates, Node *source, bool *visi
 
     if (weight < INT_MAX)
     {
-        candidates->insertKey(new MinHeapNode(source->getId(), targetId, weight, targetCluster));
+        try
+        {
+            // min = new MinHeapNode(source->getId(), targetId, weight, targetCluster);
+            min = new MinHeapNode();
+            min->setId(source->getId());
+            min->setTargetId(targetId);
+            min->setWeight(weight);
+            candidates->insertKey(min);
+        }
+        catch (int e)
+        {
+            cout << "An exception occurred. Exception Nr. " << e << '\n';
+        }
+    }
+}
+
+void addEdges(vector<Edge *> *vet, Node *sourceNode, Graph *g, bool visitedClusters[])
+{
+    Edge *edge = g->getNode(sourceNode->getId())->getFirstEdge();
+
+    while (edge != nullptr)
+    {
+        if (!visitedClusters[g->getNode(edge->getTargetId())->getCluster() - 1])
+            vet->push_back(edge);
+        edge = edge->getNextEdge();
     }
 }
 
@@ -702,6 +727,7 @@ Graph *Graph::greed()
     Node *node;
     Edge *edge;
     bool visitedClusters[number_clusters];
+    vector<Edge *> k(number_edges);
 
     for (cluster = first_cluster; cluster != nullptr; cluster = cluster->getNextCluster())
     {
@@ -715,42 +741,51 @@ Graph *Graph::greed()
         currentCluster = cluster;
         currentCost = 0;
 
-        candidates = new MinHeap(order);
         // No inicio da execuçao, todos vértices do primeiro grupo podem ter arestas candidatas
         for (int i = 0; i < currentCluster->getSize(); i++)
         {
-            insertCandidateEdge(this, candidates, cluster->getElement(i), visitedClusters);
+            // insertCandidateEdge(this, candidates, cluster->getElement(i), visitedClusters);
+            addEdges(&k, cluster->getElement(i), this, visitedClusters);
         }
 
+        int indice_menor;
         for (int i = 1; i < number_clusters; i++)
         {
             // inserir arestas de vértices que j­á estao na soluçao como candidatos;
             for (node = tree->getFirstNode(); node != nullptr; node = node->getNextNode())
             {
-                insertCandidateEdge(this, candidates, node, visitedClusters);
+                addEdges(&k, node, this, visitedClusters);
             }
-
-            minVertex = candidates->getMin();
-
-            if (minVertex != nullptr)
+            edge = k[0];
+            for (int i = 1; i < k.size(); i++)
             {
-                tree->insertNode(minVertex->getId());
-                tree->insertNode(minVertex->getTargetId());
-                tree->insertEdge(minVertex->getId(), minVertex->getTargetId(), minVertex->getWeight());
-                currentCost += minVertex->getWeight();
-                visitedClusters[minVertex->getTargetCluster() - 1] = true;
+                if (k[i]->getWeight() < edge->getWeight())
+                {
+                    edge = k[i];
+                }
             }
-            delete candidates;
-            candidates = new MinHeap(order);
+
+            if (edge != nullptr)
+            {
+                if (!tree->searchNode(edge->getOriginId()))
+                {
+                    tree->insertNode(edge->getOriginId());
+                }
+                if (!tree->searchNode(edge->getTargetId()))
+                {
+                    tree->insertNode(edge->getTargetId());
+                }
+                tree->insertEdge(edge->getOriginId(), edge->getTargetId(), edge->getWeight());
+
+                currentCost += edge->getWeight();
+                int clustId = this->getNode(edge->getTargetId())->getCluster() - 1;
+                visitedClusters[clustId] = true;
+            }
+            k.clear();
         }
 
         if (currentCost < minCost)
         {
-            if (minimalTree != nullptr)
-            {
-                delete minimalTree;
-            }
-
             minimalTree = tree;
             minCost = currentCost;
         }

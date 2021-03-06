@@ -25,7 +25,7 @@ MinHeap::~MinHeap()
     {
         delete heap[i];
     }
-    delete heap;
+    delete[] heap;
 }
 
 // Inserts a new key 'k'
