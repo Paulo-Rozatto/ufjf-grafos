@@ -260,31 +260,27 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
     //Subgrafo induzido por um conjunto de vértices X;
     case 1:
     {
-        int x;
-        cout << "Quantos vertices voce quer digitar?" << endl;
-        cin >> x;
-        int vertices[x];
-        cout << "Digite os vertices: ";
-        for (int i = 0; i < x; i++)
-        {
-            cin >> vertices[i];
-        }
-        Graph *g = g->getVertexInduced(vertices, *graph, x);
-        Node *node = graph->getFirstNode();
-        cout << "vertices grafo original: ";
+        bool *vertices = new bool[graph->getOrder()];
 
-        while (node != nullptr)
+        for(int i = 0; i < graph->getOrder(); i++)
         {
-            cout << node->getId();
-            node = node->getNextNode();
+            vertices[i] = false;
         }
-        cout << endl;
-        cout << "vertices grafo induzido: ";
-        for (Node *node = g->getFirstNode(); node != nullptr; node = node->getNextNode())
+        int x;
+        cout << "quantos vertices formam o grafo induzido?" << endl;
+        cin >> x;
+
+        int nos;
+        cout << "digite os vertices que fazem parte desse grafo induzido: " << endl;
+        for(int j = 0; j < x; j++)
         {
-            cout << node->getId();
+            cin >> nos;
+            vertices[nos] = true;
         }
-        cout << endl;
+
+        graph = graph->getVertexInduced(vertices, x, output_file);
+        escrita(graph, output_file);
+
         break;
     }
         //Caminho mínimo entre dois vértices usando Dijkstra;

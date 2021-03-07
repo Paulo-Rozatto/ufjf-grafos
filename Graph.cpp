@@ -578,32 +578,47 @@ void breadthFirstSearch(ofstream &output_file)
 {
 }
 
-Graph *Graph::getVertexInduced(int *listIdNodes, Graph &graph, int x)
+Graph *Graph::getVertexInduced(bool *vertices, int x, ofstream &output_file)
 {
-    //cria uma copia do grafo original para serem feitas as opera��es
-    Graph *g1 = new Graph(graph);
-    Node *node = graph.getFirstNode();
+    vector <Edge> arestas;
+    Graph *g1 = new Graph(x ,this->getDirected(), this->getWeightedEdge(), this->getWeightedNode());
+    Node *node = this->getFirstNode();
+    Edge *edge;
 
-    //percorre o grafo em busca dos nos passados pelo array por parametro
-    while (node != nullptr)
+    for(int i = 0; i < this->getOrder(); i++)
     {
-        bool verifica = false;
-
-        for (int i = 0; i < x; i++)
+        if(vertices[node->getId()] == true)
         {
-            if (node->getId() == listIdNodes[i])
+            for(edge = node->getFirstEdge(); edge != node->getLastEdge(); edge = edge->getNextEdge())
             {
-                verifica = true;
+                if(vertices[edge->getTargetId()] == true)
+                {
+                    arestas.push_back(Edge(node->getId(), edge->getTargetId(), edge->getWeight()));
+                }
             }
-        }
-        //exclui o n� do grafo copia para transformar ele em subgrafo induzido
-        if (!verifica)
-        {
-            g1->removeNode(node->getId());
+            if(vertices[edge->getTargetId()] == true)
+            {
+                arestas.push_back(Edge(node->getId(), edge->getTargetId(), edge->getWeight()));
+            }
+            vertices[node->getId()] = false;
+            g1->insertNode(node->getId());
         }
         node = node->getNextNode();
     }
-    //retorna o subgrafo induzido
+
+    cout << endl
+         << "Subgrafo induzido por um conjunto de vertices" << endl
+         << endl;
+    output_file << "subgraph{" << endl;
+    for(int j = 0; j < arestas.size(); j++)
+    {
+        cout << "(" << arestas[j].getOriginId() << ", " << arestas[j].getTargetId() << ") - peso = " << arestas[j].getWeight() << endl;
+        output_file << "\t" << arestas[j].getOriginId() << " -> " << arestas[j].getTargetId() << ";" << endl;
+
+        g1->insertEdge(arestas[j].getOriginId(), arestas[j].getTargetId(), arestas[j].getWeight());
+    }
+    output_file << "}" << endl;
+
     return g1;
 }
 
