@@ -103,7 +103,7 @@ Graph *leituraComGrupos(ifstream &input_file, int directed, int weightedEdge, in
     Cluster *cluster;
 
     // Criando objeto grafo
-    Graph *graph = new Graph(0, directed, weightedEdge, weightedNode);
+    Graph *graph = new Graph(0, directed, weightedEdge, weightedNode, true);
 
     //Leitura de arquivo
     while (getline(input_file, clusterId))
@@ -338,7 +338,7 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
         //Ordenação Topologica;
     case 7:
     {
-
+        graph->topologicalSorting(graph);
         break;
     };
     case 8:
@@ -383,10 +383,10 @@ int main(int argc, char const *argv[])
 {
 
     //Verificação se todos os parâmetros do programa foram entrados
-    if (argc < 6 || argc > 7)
+    if (argc != 7)
     {
 
-        cout << "ERROR: Expecting: ./<program_name> <input_file> <output_file> <directed> <weighted_edge> <weighted_node> " << endl;
+        cout << "ERROR: Expecting: ./<program_name> <input_file> <output_file> <directed> <weighted_edge> <weighted_node> <has_cluster>" << endl;
         return 1;
     }
 
@@ -410,7 +410,8 @@ int main(int argc, char const *argv[])
 
     if (input_file.is_open())
     {
-        if (argc == 7 && atoi(argv[6]))
+        // os arquivos de grafos com grupos tem outro padrao, eh melhor um metodo separado para ler-los
+        if (atoi(argv[6]))
         {
             graph = leituraComGrupos(input_file, atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
         }

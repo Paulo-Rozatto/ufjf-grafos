@@ -32,11 +32,27 @@ Graph::Graph(int order, bool directed, bool weighted_edge, bool weighted_node)
     this->weighted_edge = weighted_edge;
     this->weighted_node = weighted_node;
     this->first_node = this->last_node = nullptr;
+    this->has_clusters = false;
     this->first_cluster = nullptr;
     this->number_edges = 0;
     this->node_cont = 0;
+    adjacencia = new list<int>[order + 1];
 }
 
+Graph::Graph(int order, bool directed, bool weighted_edge, bool weighted_node, bool has_clusters)
+{
+
+    this->order = order;
+    this->directed = directed;
+    this->weighted_edge = weighted_edge;
+    this->weighted_node = weighted_node;
+    this->first_node = this->last_node = nullptr;
+    this->has_clusters = has_clusters;
+    this->first_cluster = nullptr;
+    this->number_edges = 0;
+    this->node_cont = 0;
+    adjacencia = new list<int>;
+}
 vector<Edge> edges; //vetor das arestas
 
 // Destructor
@@ -169,6 +185,12 @@ void Graph::insertEdge(int id, int target_id, float weight)
 {
     Edge edge(id, target_id, weight); //cria aresta com as configura��es dadas
     edges.push_back(edge);            // preenche o vetor de arestas
+
+    if (!has_clusters)
+    {
+        // a lista de adjacencia e montada adicionando o vertice alvo no array referente ao vertice origem
+        adjacencia[id].push_back(target_id);
+    }
 
     Node *node, *target_node;
     node = getNode(id);
@@ -336,7 +358,7 @@ float Graph::floydMarshall(int idSource, int idTarget)
     // se pelo menos um dos vertices passados por parametro nao existir no grafo, retorna infinito e exibe mensagem
     if (!isSource || !isTarget)
     {
-        cout << "Entrada inválida!" << endl;
+        cout << "Entrada invalida!" << endl;
         return INT_MAX;
     }
 
@@ -344,6 +366,36 @@ float Graph::floydMarshall(int idSource, int idTarget)
 
     // uma matriz quadrada de distancias entre os vertices
     float matDistancias[order][order];
+
+    // inicializa a matriz com os maiores valores possiveis
+    for (int i = 0; i < order; i++)
+    {
+        for (int j = 0; j < order; j++)
+        {
+            matDistancias[i][j] = INT_MAX;
+        }
+    }
+
+    // variaveis auxiliares para o preenchimento da matriz
+    Node *x; //percorrer� os n�s do grafo
+    Edge *y; //percorrera as arestas do grafo
+    int z;   //indicara o Id do n� de chegada da aresta
+    x = first_node;
+    y = x->getFirstEdge();
+    z = y->getTargetId();
+
+    // preenche a matriz com os valores ja oferecidos
+    for (x = first_node; x != nullptr; x = x->getNextNode())
+    {
+        for (y = x->getFirstEdge(); y != x->getLastEdge(); y = y->getNextEdge())
+        {
+            z = y->getTargetId();
+            matDistancias[x->getId() - 1][z - 1] = y->getWeight();
+        }
+        y = x->getLastEdge();
+        z = y->getTargetId();
+        matDistancias[x->getId() - 1][z - 1] = y->getWeight();
+    }
 
     // elementos que representam a distancia de um vertice para ele mesmo inicializados como zero na matriz
     for (int i = 0; i < order; i++)
@@ -354,38 +406,6 @@ float Graph::floydMarshall(int idSource, int idTarget)
                 matDistancias[i][j] = 0;
         }
     }
-
-    // algoritmo de leitura nao pega um terceiro parametro (peso) de entrada.txt; Aqui se faz necessaria a inserçao manual das arestas:
-    matDistancias[0][1] = 7;
-    matDistancias[0][2] = 1;
-    matDistancias[0][3] = INT_MAX;
-    matDistancias[0][4] = INT_MAX;
-    matDistancias[0][5] = INT_MAX;
-    matDistancias[1][0] = 7;
-    matDistancias[1][2] = 5;
-    matDistancias[1][3] = 4;
-    matDistancias[1][4] = 2;
-    matDistancias[1][5] = 1;
-    matDistancias[2][0] = 1;
-    matDistancias[2][1] = 5;
-    matDistancias[2][3] = INT_MAX;
-    matDistancias[2][4] = 2;
-    matDistancias[2][5] = 7;
-    matDistancias[3][0] = INT_MAX;
-    matDistancias[3][1] = 4;
-    matDistancias[3][2] = INT_MAX;
-    matDistancias[3][4] = 5;
-    matDistancias[3][5] = INT_MAX;
-    matDistancias[4][0] = INT_MAX;
-    matDistancias[4][1] = 2;
-    matDistancias[4][2] = 2;
-    matDistancias[4][3] = 5;
-    matDistancias[4][5] = 3;
-    matDistancias[5][0] = INT_MAX;
-    matDistancias[5][1] = 1;
-    matDistancias[5][2] = 7;
-    matDistancias[5][3] = INT_MAX;
-    matDistancias[5][4] = 3;
 
     // alagoritmo de Floyd que varre a matriz inicial com apenas os pesos das arestas entre vertices adjacentes e modiifca para o caminho minimo entre dois vertices quaisquer do grafo
     for (int k = 0; k < order; k++)
@@ -399,6 +419,7 @@ float Graph::floydMarshall(int idSource, int idTarget)
             }
         }
     }
+
     // retorna a distancia entre os dois vertices escolhidos, que estao subtraidos a 1 para serem representados na matriz
     return matDistancias[idSource - 1][idTarget - 1];
 }
@@ -501,8 +522,56 @@ float Graph::dijkstra(int idSource, int idTarget, ofstream &output_file)
 }
 
 //function that prints a topological sorting
-void topologicalSorting()
+void Graph::topologicalSorting(Graph *graph)
 {
+    stack<int> pilhaTopologica;
+    int tamGrafo = graph->getOrder() + 1;
+    vector<bool> nosVisitados(tamGrafo, false);
+
+    for (int i = 0; i < tamGrafo; i++)
+    {
+        if (nosVisitados[i] == false)
+        {
+            auxTopologicalSorting(i, nosVisitados, pilhaTopologica);
+        }
+    }
+
+    cout << "\nOrdenacao topologica:" << endl
+         << "< ";
+
+    while (pilhaTopologica.empty() == false && pilhaTopologica.top() != 0)
+    {
+        if (pilhaTopologica.size() > 2)
+        {
+            cout << pilhaTopologica.top() << ", ";
+            pilhaTopologica.pop();
+        }
+        else
+        {
+            cout << pilhaTopologica.top() << " ";
+            pilhaTopologica.pop();
+        }
+    }
+    cout << ">" << endl
+         << endl;
+}
+
+//fun��o recursiva auxiliar a topologicalSort
+void Graph::auxTopologicalSorting(int index, vector<bool> &nosVisitados, stack<int> &pilhaTopologica)
+{
+    nosVisitados[index] = true;
+
+    // busco todos os vertices adjacentes ao index
+    list<int>::iterator i;
+    for (i = adjacencia[index].begin(); i != adjacencia[index].end(); ++i)
+    {
+        if (!nosVisitados[*i])
+        {
+            auxTopologicalSorting(*i, nosVisitados, pilhaTopologica);
+        }
+    }
+
+    pilhaTopologica.push(index);
 }
 
 void breadthFirstSearch(ofstream &output_file)
@@ -679,6 +748,12 @@ void addEdges(vector<Edge *> *vet, Node *sourceNode, Graph *g, bool visitedClust
 // Adaptaçao de PRIM
 Graph *Graph::greed()
 {
+    if (!this->has_clusters)
+    {
+        cout << "Erro: Grafo nao tem grupos para se realizar arvore minima generalizada. Tente o algoritmo de Prim ou de Kruskal." << endl;
+        return nullptr;
+    }
+
     Graph *minimalTree = nullptr;          // Armazena a menor arvore entre todas iteraçoes
     Graph *tree;                           // armazena arvore construida em determinada iteraçao
     int minCost = INT_MAX;                 // guarda o menor custo entre todas iteracoes
@@ -692,7 +767,7 @@ Graph *Graph::greed()
     // O resultado pode alterar dependo de qual grupo se começa, entao o algoritmo se executa varias vezes, cada vez começando de um grupo
     for (cluster = first_cluster; cluster != nullptr; cluster = cluster->getNextCluster())
     {
-        tree = new Graph(0, directed, weighted_edge, weighted_node); // inicializa arvore vazia pra guardar o resultado da iteracao
+        tree = new Graph(0, directed, weighted_edge, weighted_node, has_clusters); // inicializa arvore vazia pra guardar o resultado da iteracao
 
         for (int i = 0; i < number_clusters; i++)
         {
