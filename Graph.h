@@ -66,10 +66,9 @@ public:
     float floydMarshall(int idSource, int idTarget);
     float dijkstra(int idSource, int idTarget, ofstream &output_file);
 
-    //methods phase1
+    //methods phase 2
     Graph *greed();
-    float greedRandom();
-    float greedRactiveRandom();
+    Graph *greedRandom();
 
 private:
 };

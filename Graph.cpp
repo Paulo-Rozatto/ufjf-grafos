@@ -833,6 +833,111 @@ Graph *Graph::greed()
         }
     }
 
-    cout << "Custo total da árvore: " << minCost << endl;
+    std::cout << "Custo total da árvore: " << minCost << endl;
+    return minimalTree;
+}
+
+bool compareEdgesWeight(Edge *a, Edge *b)
+{
+    return a->getWeight() < b->getWeight();
+}
+
+Graph *Graph::greedRandom()
+{
+    if (!this->has_clusters)
+    {
+        std::cout << "Erro: Grafo nao tem grupos para se realizar arvore minima generalizada. Tente o algoritmo de Prim ou de Kruskal." << endl;
+        return nullptr;
+    }
+
+    Graph *minimalTree = nullptr;          // Armazena a menor arvore entre todas iteraçoes
+    Graph *tree;                           // armazena arvore construida em determinada iteraçao
+    int minCost = INT_MAX;                 // guarda o menor custo entre todas iteracoes
+    int currentCost;                       // usado para calcular custo em determinada itecao
+    Cluster *cluster;                      // grupo do qual esta partindo o algoritmo em determina iteracao
+    vector<Edge *> k(number_edges);        // guarda arestas candidatas
+    float alpha = 0.05;                    // indice de randomizacao
+    float max;                             // O mairo custo aceitavel na randomizacao
+    bool visitedClusters[number_clusters]; // armazena quais grupos ja foram visitados
+    Node *node;                            // Vertice auxiliar
+    Edge *edge;                            // Aresta auxiliar
+
+    srand(time(NULL));
+
+    // O resultado pode alterar dependo de qual grupo se começa, entao o algoritmo se executa varias vezes, cada vez começando de um grupo
+    for (cluster = first_cluster; cluster != nullptr; cluster = cluster->getNextCluster())
+    {
+        tree = new Graph(0, directed, weighted_edge, weighted_node, has_clusters); // inicializa arvore vazia pra guardar o resultado da iteracao
+
+        for (int i = 0; i < number_clusters; i++)
+        {
+            visitedClusters[i] = false; // marca todos os grupo como nao visitados
+        }
+        currentCost = 0;
+        visitedClusters[cluster->getId() - 1] = true; // marca o grupo atual como visitado nao entrarem arestas internas como candidatas
+
+        // Pecorre todos vertices do grupo e adciona qualquer aresta pra qualquer outro grupo como candidata
+        for (int i = 0; i < cluster->getSize(); i++)
+        {
+            addEdges(&k, cluster->getElement(i), this, visitedClusters);
+        }
+
+        // Como ha um grupo ja visitado, precisa-se de n - 1 iteracoes para visitar todos os grupos, sendo n a quantidade de grupos
+        for (int i = 1; i < number_clusters; i++)
+        {
+            // Monta o conjuto de arestas candidatas a partir das adjacencias dos vertices que ja pertencem a solucao
+            for (node = tree->getFirstNode(); node != nullptr; node = node->getNextNode())
+            {
+                addEdges(&k, node, this, visitedClusters);
+            }
+            sort(k.begin(), k.end(), compareEdgesWeight); // ordena as arestas candidatas
+            max = k.front()->getWeight() + alpha * (k.back()->getWeight() - k.front()->getWeight());
+
+            for (int i = 0; i < k.size(); i++)
+            {
+                if (k[i]->getWeight() == max)
+                {
+                    edge = k[rand() % (i + 1)];
+                    break;
+                }
+                else if (k[i]->getWeight() > max)
+                {
+                    edge = k[rand() % i];
+                    break;
+                }
+            }
+
+            if (!tree->searchNode(edge->getOriginId()))
+            {
+                tree->insertNode(edge->getOriginId());
+            }
+            if (!tree->searchNode(edge->getTargetId()))
+            {
+                tree->insertNode(edge->getTargetId());
+            }
+            tree->insertEdge(edge->getOriginId(), edge->getTargetId(), edge->getWeight()); // adciona a aresta de menor custo na solucao
+            currentCost += edge->getWeight();                                              // atualiza custo da solucao
+            visitedClusters[this->getNode(edge->getTargetId())->getCluster() - 1] = true;  // marca o grupo do vertice alvo da aresta como visitado
+
+            k.clear(); // limpa conjunto de arestas candidatas para ser reconstruido na proxima iteracao
+        }
+
+        // Se a solucao dessa iteracao for a melhor ate o momento, guarde ela
+        if (currentCost < minCost)
+        {
+            if (minimalTree != nullptr)
+            {
+                delete minimalTree;
+            }
+            minimalTree = tree;
+            minCost = currentCost;
+        }
+        else
+        {
+            delete tree; // Se nao for a melhor solucao, apague-a;
+        }
+    }
+
+    std::cout << "Custo total da árvore: " << minCost << endl;
     return minimalTree;
 }

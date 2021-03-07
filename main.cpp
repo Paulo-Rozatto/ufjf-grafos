@@ -344,6 +344,12 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
     case 8:
     {
         escrita(graph->greed(), output_file);
+        break;
+    }
+    case 9:
+    {
+        escrita(graph->greedRandom(), output_file);
+        break;
     }
     case 0:
     {
