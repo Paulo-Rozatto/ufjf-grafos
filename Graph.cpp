@@ -340,7 +340,7 @@ void Graph::breadthFirstSearch(ofstream &output_file)
          << endl;
 }
 
-float Graph::floydMarshall(int idSource, int idTarget)
+float Graph::floydMarshall(int idSource, int idTarget, ofstream &output_file)
 {
     Node *node;
     Edge *edge;
@@ -407,6 +407,16 @@ float Graph::floydMarshall(int idSource, int idTarget)
         }
     }
 
+    // matriz de auxilio para impressao do grafo pelo Graphviz
+    int matR[order][order];
+    for (int i = 0; i < order; i++)
+    {
+        for (int j = 0; j < order; j++)
+        {
+            matR[i][j]=j;
+        }
+    }
+
     // alagoritmo de Floyd que varre a matriz inicial com apenas os pesos das arestas entre vertices adjacentes e modiifca para o caminho minimo entre dois vertices quaisquer do grafo
     for (int k = 0; k < order; k++)
     {
@@ -415,14 +425,45 @@ float Graph::floydMarshall(int idSource, int idTarget)
             for (j = 0; j < order; j++)
             {
                 if (matDistancias[i][j] > matDistancias[i][k] + matDistancias[k][j])
+                {
                     matDistancias[i][j] = matDistancias[i][k] + matDistancias[k][j];
+                    matR[i][j]= matR[i][k];
+                }
             }
         }
     }
 
+    // procedimentos para impressao pelo Graphviz
+    int s = idSource - 1;
+    int e = idTarget - 1;
+    int cont = 0;
+
+    int vet[order];
+
+    for (int i = 0; i < order; i++)
+    {
+        vet[i]= -1;
+    }
+
+    while (s!=e)
+    {
+       vet[cont] = s + 1;
+       s = matR[s][e];
+       cont++;
+    }
+    vet[cont]=e + 1;
+
+    output_file << "graph caminho_minimo{" << endl;
+    for (int i = 0; vet[i+1]!= -1; i++)
+    {
+        output_file << vet[i] << " -- " << vet[i+1] << endl;
+    }
+    output_file << "}";
+
     // retorna a distancia entre os dois vertices escolhidos, que estao subtraidos a 1 para serem representados na matriz
     return matDistancias[idSource - 1][idTarget - 1];
 }
+
 
 float Graph::dijkstra(int idSource, int idTarget, ofstream &output_file)
 {

@@ -63,7 +63,7 @@ public:
     Graph *getVertexInduced(bool *vertices, int x, ofstream &output_file);
     Graph *agmKuskal(Graph *graph);
     Graph *agmPrim();
-    float floydMarshall(int idSource, int idTarget);
+    float floydMarshall(int idSource, int idTarget, ofstream &output_file);
     float dijkstra(int idSource, int idTarget, ofstream &output_file);
 
     //methods phase 2

@@ -306,7 +306,7 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
         cout << "Digite o id do vertice de destino: ";
         cin >> target;
         cout << "Comprimento do caminho minimo entre os vertices escolhidos: ";
-        cout << graph->floydMarshall(source, target) << endl;
+        cout << graph->floydMarshall(source, target, output_file) << endl;
         break;
     }
 

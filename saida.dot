@@ -1,1 +1,5 @@
+graph caminho_minimo{
+3 -- 1
+1 -- 5
+}
 
