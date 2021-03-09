@@ -307,7 +307,7 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
         cout << "Digite o id do vertice de destino: ";
         cin >> target;
         cout << "Comprimento do caminho minimo entre os vertices escolhidos: ";
-        cout << graph->floydMarshall(source, target) << endl;
+        cout << graph->floydMarshall(source, target, output_file) << endl;
         break;
     }
 
@@ -322,7 +322,7 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
         //AGM Prim;
     case 5:
     {
-        graph->agmKuskal(graph);
+        graph->agmKuskal(graph, output_file);
         break;
     }
 

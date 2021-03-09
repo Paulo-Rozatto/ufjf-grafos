@@ -282,7 +282,8 @@ void Graph::breadthFirstSearch(ofstream &output_file)
     Node *auxNode = this->getFirstNode(); //n� auxiliar
     Edge *auxEdge;                        //aresta auxiliar
     for (int i = 0; i < tam; i++)
-    { //iniciando visitados
+    {
+        //iniciando visitados
         *(visitados + i) = false;
         nos[auxNode->getId()] = auxNode;
         auxNode = auxNode->getNextNode();
@@ -296,7 +297,8 @@ void Graph::breadthFirstSearch(ofstream &output_file)
         auxEdge = auxNode->getFirstEdge();
         int cont = 0;
         while ((cont < (auxNode->getOutDegree() + auxNode->getInDegree())) && auxEdge != nullptr)
-        { //adiciona todos os n�s visihos n�o visitados
+        {
+            //adiciona todos os n�s visihos n�o visitados
             if (*(visitados + auxEdge->getTargetId()) == false)
             {
                 *(visitados + auxEdge->getTargetId()) = true;
@@ -340,7 +342,7 @@ void Graph::breadthFirstSearch(ofstream &output_file)
          << endl;
 }
 
-float Graph::floydMarshall(int idSource, int idTarget)
+float Graph::floydMarshall(int idSource, int idTarget, ofstream &output_file)
 {
     Node *node;
     Edge *edge;
@@ -407,6 +409,16 @@ float Graph::floydMarshall(int idSource, int idTarget)
         }
     }
 
+    // matriz de auxilio para impressao do grafo pelo Graphviz
+    int matR[order][order];
+    for (int i = 0; i < order; i++)
+    {
+        for (int j = 0; j < order; j++)
+        {
+            matR[i][j]=j;
+        }
+    }
+
     // alagoritmo de Floyd que varre a matriz inicial com apenas os pesos das arestas entre vertices adjacentes e modiifca para o caminho minimo entre dois vertices quaisquer do grafo
     for (int k = 0; k < order; k++)
     {
@@ -415,14 +427,45 @@ float Graph::floydMarshall(int idSource, int idTarget)
             for (j = 0; j < order; j++)
             {
                 if (matDistancias[i][j] > matDistancias[i][k] + matDistancias[k][j])
+                {
                     matDistancias[i][j] = matDistancias[i][k] + matDistancias[k][j];
+                    matR[i][j]= matR[i][k];
+                }
             }
         }
     }
 
+    // procedimentos para impressao pelo Graphviz
+    int s = idSource - 1;
+    int e = idTarget - 1;
+    int cont = 0;
+
+    int vet[order];
+
+    for (int i = 0; i < order; i++)
+    {
+        vet[i]= -1;
+    }
+
+    while (s!=e)
+    {
+        vet[cont] = s + 1;
+        s = matR[s][e];
+        cont++;
+    }
+    vet[cont]=e + 1;
+
+    output_file << "graph caminho_minimo{" << endl;
+    for (int i = 0; vet[i+1]!= -1; i++)
+    {
+        output_file << vet[i] << " -- " << vet[i+1] << endl;
+    }
+    output_file << "}";
+
     // retorna a distancia entre os dois vertices escolhidos, que estao subtraidos a 1 para serem representados na matriz
     return matDistancias[idSource - 1][idTarget - 1];
 }
+
 
 float Graph::dijkstra(int idSource, int idTarget, ofstream &output_file)
 {
@@ -524,10 +567,12 @@ float Graph::dijkstra(int idSource, int idTarget, ofstream &output_file)
 //function that prints a topological sorting
 void Graph::topologicalSorting(Graph *graph)
 {
-    stack<int> pilhaTopologica;
+    stack<int> pilhaTopologica; //pilha que armazena a ordem
     int tamGrafo = graph->getOrder() + 1;
-    vector<bool> nosVisitados(tamGrafo, false);
+    vector<bool> nosVisitados(tamGrafo, false); // vetor que informa se o vertice ja foi visitado inicializa todas
+    // as posicoes como false
 
+    // varredura de todos os vertices, e caso ele nao tenha sido visitado, chama a funcao auxiliar para iniciar a recursao
     for (int i = 0; i < tamGrafo; i++)
     {
         if (nosVisitados[i] == false)
@@ -539,6 +584,7 @@ void Graph::topologicalSorting(Graph *graph)
     cout << "\nOrdenacao topologica:" << endl
          << "< ";
 
+    // estrutura responsavel por imprimir a ordem topologica
     while (pilhaTopologica.empty() == false && pilhaTopologica.top() != 0)
     {
         if (pilhaTopologica.size() > 2)
@@ -556,22 +602,23 @@ void Graph::topologicalSorting(Graph *graph)
          << endl;
 }
 
-//fun��o recursiva auxiliar a topologicalSort
+//funcao recursiva auxiliar a topologicalSort
 void Graph::auxTopologicalSorting(int index, vector<bool> &nosVisitados, stack<int> &pilhaTopologica)
 {
-    nosVisitados[index] = true;
+    nosVisitados[index] = true; // marco o vertice da vez como visitado
 
     // busco todos os vertices adjacentes ao index
     list<int>::iterator i;
     for (i = adjacencia[index].begin(); i != adjacencia[index].end(); ++i)
     {
+        // verifico se o vertice ja foi visitado e chama a recursao novamente em caso negativo
         if (!nosVisitados[*i])
         {
             auxTopologicalSorting(*i, nosVisitados, pilhaTopologica);
         }
     }
 
-    pilhaTopologica.push(index);
+    pilhaTopologica.push(index); // ao final das recursoes, a pilha sera preenchida na ordem em que as chamadas ocorreram
 }
 
 void breadthFirstSearch(ofstream &output_file)
@@ -581,7 +628,7 @@ void breadthFirstSearch(ofstream &output_file)
 Graph *Graph::getVertexInduced(bool *vertices, int x, ofstream &output_file)
 {
     vector <Edge> arestas;
-    Graph *g1 = new Graph(x ,this->getDirected(), this->getWeightedEdge(), this->getWeightedNode());
+    Graph *g1 = new Graph(x,this->getDirected(), this->getWeightedEdge(), this->getWeightedNode());
     Node *node = this->getFirstNode();
     Edge *edge;
 
@@ -622,25 +669,25 @@ Graph *Graph::getVertexInduced(bool *vertices, int x, ofstream &output_file)
     return g1;
 }
 
-/// As fun��es "searchForSubset" e "join" tendem a detectar os ciclos em grafos N�O direcionados. Condi��o fundamental
-/// na montagem do algoritmo de Kruskal.
-//essa fun��o busca o subconjunto (subset) do n� "i" de forma recursiva.
+// As funcoes "searchForSubset" e "join" tendem a detectar os ciclos em grafos NAO direcionados. Condicao fundamental
+// na montagem do algoritmo de Kruskal.
+//essa funcao busca o subconjunto (subset) do no "i" de forma recursiva.
 int searchForSubset(int subset[], int i)
 {
     if (subset[i] == -1)
         return i;
     return searchForSubset(subset, subset[i]);
 }
-//a fun��o de "join" � unir dois "subsets" (subconjuntos) em 1 �nico subconjunto.
+//a funcao de "join" e unir dois "subsets" (subconjuntos) em 1 unico subconjunto.
 void join(int subset[], int v1, int v2)
 {
     int v1_set = searchForSubset(subset, v1);
     int v2_set = searchForSubset(subset, v2);
     subset[v1_set] = v2_set;
 }
-Graph *Graph::agmKuskal(Graph *graph)
+Graph *Graph::agmKuskal(Graph *graph, ofstream &output_file)
 {
-    vector<Edge> tree; //vetor para armazenar a solu��o do problema
+    vector<Edge> tree; //vetor para armazenar a solucao do problema
 
     int size_edges = edges.size();
 
@@ -650,7 +697,7 @@ Graph *Graph::agmKuskal(Graph *graph)
     int V = graph->getOrder();
     int *subset = new int[V + 1];
 
-    //  juntamos todos os subconjuntos em um conjunto pr�prio. Ex: S={A, B, C, D, E}.
+    //  juntamos todos os subconjuntos em um conjunto proprio. Ex: S={A, B, C, D, E}.
     memset(subset, -1, sizeof(int) * V);
 
     for (int i = 0; i < size_edges; i++)
@@ -658,7 +705,7 @@ Graph *Graph::agmKuskal(Graph *graph)
         int v1 = searchForSubset(subset, edges[i].getOriginId());
         int v2 = searchForSubset(subset, edges[i].getTargetId());
 
-        // se forem diferentes, sabemos que n�o forma ciclo, portanto, inserimos no vetor "tree".
+        // se forem diferentes, sabemos que nao forma ciclo, portanto, inserimos no vetor "tree".
         if (v1 != v2)
         {
             tree.push_back(edges[i]);
@@ -668,7 +715,7 @@ Graph *Graph::agmKuskal(Graph *graph)
 
     int size_tree = tree.size();
 
-    // tem a fun��o de mostrar as arestas selecionadas e seus respectivos pesos, no final, tem-se o custo total.
+    // estrutura responsavel por imprimir as arestas selecionadas e seus respectivos pesos, no final, tem-se o custo total.
     cout << endl;
     cout << "Arvore Geradora Minima usando algoritmo de Kruskal" << endl;
     float weightResult = 0;
@@ -682,69 +729,94 @@ Graph *Graph::agmKuskal(Graph *graph)
     }
     cout << "Peso total do arvore: " << weightResult << endl;
     cout << endl;
+
+    output_file << "strict graph kruskal{" << endl;
+    for (int i = 0; i < size_tree; i++)
+    {
+        output_file << "\t" << tree[i].getOriginId() << " -- " << tree[i].getTargetId() << ";" << endl;
+    }
+    output_file << "}";
+
 }
 Graph *Graph::agmPrim()
 {
-    int tam = this->getOrder(); //armazena n�mero de v�rtices.
-    int prox[tam];              //armazena o id do v�rtice mais pr�ximo que ainda n�o foi inserido na solu��o
-    Graph *tree = new Graph(this->getOrder(), this->getDirected(), this->getWeightedEdge(), this->getWeightedNode());
-    vector<Edge> custo; //armazena os menores custos de arestas incidentes na solu��o.
-    vector<Node *> nos(tam);
-    Node *auxNode = this->getFirstNode();
-    int primeiro = auxNode->getId();
-    Edge *auxEdge;
-    for (int i = 0; i < tam; i++)
-    { //Inicia o vetor de custo com valores m�ximos e preenche o vetor prox.
-        prox[i] = primeiro;
-        custo.push_back(Edge(i, primeiro, INT_MAX));
-        nos[auxNode->getId()] = auxNode;
-        tree->insertNode(auxNode->getId());
-        auxNode = auxNode->getNextNode();
-    }
-    int i, j, k = 0;
-    j = (primeiro);
-    while (k < tam)
+    if(!this->getDirected())
     {
-        prox[j] = -1; //atualiza prox.
-        auxNode = nos[j];
-        auxEdge = auxNode->getFirstEdge();
-        int cont = 0;
-        while ((cont < (auxNode->getOutDegree() + auxNode->getInDegree())) && auxEdge != nullptr)
+        int tam = this->getOrder(); //armazena n�mero de v�rtices.
+        int prox[tam];              //armazena o id do v�rtice mais pr�ximo que ainda n�o foi inserido na solu��o
+        Graph *tree = new Graph(this->getOrder(), this->getDirected(), this->getWeightedEdge(), this->getWeightedNode());
+        vector<Edge> custo; //armazena os menores custos de arestas incidentes na solu��o.
+        vector<Node *> nos(tam);
+        Node *auxNode = this->getFirstNode();
+        int primeiro = auxNode->getId();
+        Edge *auxEdge;
+        for (int i = 0; i < tam; i++)
         {
-            if (prox[auxEdge->getTargetId()] != -1 && (custo[auxEdge->getTargetId()].getWeight() > auxEdge->getWeight()))
-            {
-                custo[auxEdge->getTargetId()] = Edge(auxNode->getId(), auxEdge->getTargetId(), auxEdge->getWeight());
-                prox[auxEdge->getTargetId()] = auxNode->getId();
-            }
-            auxEdge = auxEdge->getNextEdge();
-            cont++;
+            //Inicia o vetor de custo com valores m�ximos e preenche o vetor prox.
+            prox[i] = primeiro;
+            custo.push_back(Edge(i, primeiro, INT_MAX));
+            nos[auxNode->getId()] = auxNode;
+            tree->insertNode(auxNode->getId());
+            auxNode = auxNode->getNextNode();
         }
-        //encontra a aresta j que n�o faz parte da solu��o e tem o menor peso.
-        for (i = 0; i < tam; i++)
-            if (prox[i] != -1)
+        int i, j, k = 0;
+        j = (primeiro);
+        while (k < tam)
+        {
+            prox[j] = -1; //atualiza prox.
+            auxNode = nos[j];
+            auxEdge = auxNode->getFirstEdge();
+            int cont = 0;
+            while ((cont < (auxNode->getOutDegree() + auxNode->getInDegree())) && auxEdge != nullptr)
             {
-                j = i;
-                break;
+                if (prox[auxEdge->getTargetId()] != -1 && (custo[auxEdge->getTargetId()].getWeight() > auxEdge->getWeight()))
+                {
+                    custo[auxEdge->getTargetId()] = Edge(auxNode->getId(), auxEdge->getTargetId(), auxEdge->getWeight());
+                    prox[auxEdge->getTargetId()] = auxNode->getId();
+                }
+                auxEdge = auxEdge->getNextEdge();
+                cont++;
             }
-        for (; i < tam; i++)
-            if (prox[i] != -1 && custo[i].getWeight() < custo[j].getWeight())
-                j = i;
-        k++;
+            //encontra a aresta j que n�o faz parte da solu��o e tem o menor peso.
+            for (i = 0; i < tam; i++)
+                if (prox[i] != -1)
+                {
+                    j = i;
+                    break;
+                }
+            for (; i < tam; i++)
+                if (prox[i] != -1 && custo[i].getWeight() < custo[j].getWeight())
+                    j = i;
+            if(custo[j].getWeight() == INT_MAX)
+            {
+                cout << "Arvore Geradora Minima usando algoritmo de Prim" << endl << endl;
+                cout << "Grafo desconexo" << endl << endl;
+                return nullptr;
+            }
+            k++;
+        }
+        sort(custo.begin(), custo.end());
+        cout << "Arvore Geradora Minima usando algoritmo de Prim" << endl
+             << endl;
+        float weightResult = 0;
+        for (int i = 0; i < tam - 1; i++)
+        {
+            //Imprime a solu��o
+            cout << "(" << custo[i].getOriginId() << ", " << custo[i].getTargetId() << ") - peso = " << custo[i].getWeight() << endl;
+            weightResult += custo[i].getWeight();
+            tree->insertEdge(custo[i].getOriginId(), custo[i].getTargetId(), custo[i].getWeight());
+        }
+        cout << endl
+             << "Peso total da arvore: " << weightResult << endl
+             << endl;
+        return tree;
     }
-    sort(custo.begin(), custo.end());
-    cout << "Arvore Geradora Minima usando algoritmo de Prim" << endl
-         << endl;
-    float weightResult = 0;
-    for (int i = 0; i < tam - 1; i++)
-    { //Imprime a solu��o
-        cout << "(" << custo[i].getOriginId() << ", " << custo[i].getTargetId() << ") - peso = " << custo[i].getWeight() << endl;
-        weightResult += custo[i].getWeight();
-        tree->insertEdge(custo[i].getOriginId(), custo[i].getTargetId(), custo[i].getWeight());
+    else
+    {
+        cout << "Arvore Geradora Minima usando algoritmo de Prim" << endl << endl;
+        cout << "Grafo direcionado" << endl << endl;
+        return nullptr;
     }
-    cout << endl
-         << "Peso total da arvore: " << weightResult << endl
-         << endl;
-    return tree;
 }
 
 void addEdges(vector<Edge *> *vet, Node *sourceNode, Graph *g, bool visitedClusters[])
