@@ -415,7 +415,7 @@ float Graph::floydMarshall(int idSource, int idTarget, ofstream &output_file)
     {
         for (int j = 0; j < order; j++)
         {
-            matR[i][j]=j;
+            matR[i][j] = j;
         }
     }
 
@@ -429,7 +429,7 @@ float Graph::floydMarshall(int idSource, int idTarget, ofstream &output_file)
                 if (matDistancias[i][j] > matDistancias[i][k] + matDistancias[k][j])
                 {
                     matDistancias[i][j] = matDistancias[i][k] + matDistancias[k][j];
-                    matR[i][j]= matR[i][k];
+                    matR[i][j] = matR[i][k];
                 }
             }
         }
@@ -444,28 +444,27 @@ float Graph::floydMarshall(int idSource, int idTarget, ofstream &output_file)
 
     for (int i = 0; i < order; i++)
     {
-        vet[i]= -1;
+        vet[i] = -1;
     }
 
-    while (s!=e)
+    while (s != e)
     {
         vet[cont] = s + 1;
         s = matR[s][e];
         cont++;
     }
-    vet[cont]=e + 1;
+    vet[cont] = e + 1;
 
     output_file << "graph caminho_minimo{" << endl;
-    for (int i = 0; vet[i+1]!= -1; i++)
+    for (int i = 0; vet[i + 1] != -1; i++)
     {
-        output_file << vet[i] << " -- " << vet[i+1] << endl;
+        output_file << vet[i] << " -- " << vet[i + 1] << endl;
     }
     output_file << "}";
 
     // retorna a distancia entre os dois vertices escolhidos, que estao subtraidos a 1 para serem representados na matriz
     return matDistancias[idSource - 1][idTarget - 1];
 }
-
 
 float Graph::dijkstra(int idSource, int idTarget, ofstream &output_file)
 {
@@ -627,23 +626,23 @@ void breadthFirstSearch(ofstream &output_file)
 
 Graph *Graph::getVertexInduced(bool *vertices, int x, ofstream &output_file)
 {
-    vector <Edge> arestas;
-    Graph *g1 = new Graph(x,this->getDirected(), this->getWeightedEdge(), this->getWeightedNode());
+    vector<Edge> arestas;
+    Graph *g1 = new Graph(x, this->getDirected(), this->getWeightedEdge(), this->getWeightedNode(), has_clusters);
     Node *node = this->getFirstNode();
     Edge *edge;
 
-    for(int i = 0; i < this->getOrder(); i++)
+    for (int i = 0; i < this->getOrder(); i++)
     {
-        if(vertices[node->getId()] == true)
+        if (vertices[node->getId()] == true)
         {
-            for(edge = node->getFirstEdge(); edge != node->getLastEdge(); edge = edge->getNextEdge())
+            for (edge = node->getFirstEdge(); edge != node->getLastEdge(); edge = edge->getNextEdge())
             {
-                if(vertices[edge->getTargetId()] == true)
+                if (vertices[edge->getTargetId()] == true)
                 {
                     arestas.push_back(Edge(node->getId(), edge->getTargetId(), edge->getWeight()));
                 }
             }
-            if(vertices[edge->getTargetId()] == true)
+            if (vertices[edge->getTargetId()] == true)
             {
                 arestas.push_back(Edge(node->getId(), edge->getTargetId(), edge->getWeight()));
             }
@@ -657,7 +656,7 @@ Graph *Graph::getVertexInduced(bool *vertices, int x, ofstream &output_file)
          << "Subgrafo induzido por um conjunto de vertices" << endl
          << endl;
     output_file << "subgraph{" << endl;
-    for(int j = 0; j < arestas.size(); j++)
+    for (int j = 0; j < arestas.size(); j++)
     {
         cout << "(" << arestas[j].getOriginId() << ", " << arestas[j].getTargetId() << ") - peso = " << arestas[j].getWeight() << endl;
         output_file << "\t" << arestas[j].getOriginId() << " -> " << arestas[j].getTargetId() << ";" << endl;
@@ -736,11 +735,10 @@ Graph *Graph::agmKuskal(Graph *graph, ofstream &output_file)
         output_file << "\t" << tree[i].getOriginId() << " -- " << tree[i].getTargetId() << ";" << endl;
     }
     output_file << "}";
-
 }
 Graph *Graph::agmPrim()
 {
-    if(!this->getDirected())
+    if (!this->getDirected())
     {
         int tam = this->getOrder(); //armazena n�mero de v�rtices.
         int prox[tam];              //armazena o id do v�rtice mais pr�ximo que ainda n�o foi inserido na solu��o
@@ -787,10 +785,12 @@ Graph *Graph::agmPrim()
             for (; i < tam; i++)
                 if (prox[i] != -1 && custo[i].getWeight() < custo[j].getWeight())
                     j = i;
-            if(custo[j].getWeight() == INT_MAX)
+            if (custo[j].getWeight() == INT_MAX)
             {
-                cout << "Arvore Geradora Minima usando algoritmo de Prim" << endl << endl;
-                cout << "Grafo desconexo" << endl << endl;
+                cout << "Arvore Geradora Minima usando algoritmo de Prim" << endl
+                     << endl;
+                cout << "Grafo desconexo" << endl
+                     << endl;
                 return nullptr;
             }
             k++;
@@ -813,8 +813,10 @@ Graph *Graph::agmPrim()
     }
     else
     {
-        cout << "Arvore Geradora Minima usando algoritmo de Prim" << endl << endl;
-        cout << "Grafo direcionado" << endl << endl;
+        cout << "Arvore Geradora Minima usando algoritmo de Prim" << endl
+             << endl;
+        cout << "Grafo direcionado" << endl
+             << endl;
         return nullptr;
     }
 }

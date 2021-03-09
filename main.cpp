@@ -244,7 +244,6 @@ int menu()
     cout << "[7] Imprimir ordenacao topologica" << endl;
     cout << "[8] Algoritmo Guloso" << endl;
     cout << "[9] Algoritmo Guloso Randomizado " << endl;
-    cout << "[10] Algoritmo Guloso Randomizado Reativo" << endl;
     cout << "[0] Sair" << endl;
 
     cin >> selecao;
@@ -408,10 +407,10 @@ int main(int argc, char const *argv[])
 {
 
     //Verificação se todos os parâmetros do programa foram entrados
-    if (argc != 7)
+    if (argc < 6 || argc > 7)
     {
 
-        cout << "ERROR: Expecting: ./<program_name> <input_file> <output_file> <directed> <weighted_edge> <weighted_node> <has_cluster>" << endl;
+        cout << "ERROR: Expecting: ./<program_name> <input_file> <output_file> <directed> <weighted_edge> <weighted_node> <has_cluster>(optional default true)" << endl;
         return 1;
     }
 
@@ -436,13 +435,13 @@ int main(int argc, char const *argv[])
     if (input_file.is_open())
     {
         // os arquivos de grafos com grupos tem outro padrao, eh melhor um metodo separado para ler-los
-        if (atoi(argv[6]))
+        if (argc == 7 && !atoi(argv[6]))
         {
-            graph = leituraComGrupos(input_file, atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
+            graph = leitura(input_file, atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
         }
         else
         {
-            graph = leitura(input_file, atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
+            graph = leituraComGrupos(input_file, atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
         }
     }
     else
