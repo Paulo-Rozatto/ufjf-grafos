@@ -570,6 +570,7 @@ void Graph::topologicalSorting(Graph *graph)
     vector<bool> nosVisitados(tamGrafo, false); // vetor que informa se o vertice ja foi visitado inicializa todas
                                                 // as posicoes como false
 
+    // varredura de todos os vertices, e caso ele nao tenha sido visitado, chama a funcao auxiliar para iniciar a recursao
     for (int i = 0; i < tamGrafo; i++){
         if (nosVisitados[i] == false){
             auxTopologicalSorting(i, nosVisitados, pilhaTopologica);
@@ -602,12 +603,13 @@ void Graph::auxTopologicalSorting(int index, vector<bool> &nosVisitados, stack<i
     // busco todos os vertices adjacentes ao index
     list<int>::iterator i;
     for (i = adjacencia[index].begin(); i != adjacencia[index].end(); ++i){
+        // verifico se o vertice ja foi visitado e chama a recursao novamente em caso negativo
         if (!nosVisitados[*i]){
-            auxTopologicalSorting(*i, nosVisitados, pilhaTopologica);
+            auxTopologicalSorting(*i, nosVisitados, pilhaTopologica); 
         }
     }
 
-    pilhaTopologica.push(index); //
+    pilhaTopologica.push(index); // ao final das recursoes, a pilha sera preenchida na ordem em que as chamadas ocorreram
 }
 
 void breadthFirstSearch(ofstream &output_file)
@@ -704,7 +706,7 @@ Graph *Graph::agmKuskal(Graph *graph, ofstream &output_file)
 
     int size_tree = tree.size();
 
-    // tem a funcao de mostrar as arestas selecionadas e seus respectivos pesos, no final, tem-se o custo total.
+    // estrutura responsavel por imprimir as arestas selecionadas e seus respectivos pesos, no final, tem-se o custo total.
     cout << endl;
     cout << "Arvore Geradora Minima usando algoritmo de Kruskal" << endl;
     float weightResult = 0;
