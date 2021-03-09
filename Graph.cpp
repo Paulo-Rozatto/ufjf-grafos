@@ -282,7 +282,8 @@ void Graph::breadthFirstSearch(ofstream &output_file)
     Node *auxNode = this->getFirstNode(); //n� auxiliar
     Edge *auxEdge;                        //aresta auxiliar
     for (int i = 0; i < tam; i++)
-    { //iniciando visitados
+    {
+        //iniciando visitados
         *(visitados + i) = false;
         nos[auxNode->getId()] = auxNode;
         auxNode = auxNode->getNextNode();
@@ -296,7 +297,8 @@ void Graph::breadthFirstSearch(ofstream &output_file)
         auxEdge = auxNode->getFirstEdge();
         int cont = 0;
         while ((cont < (auxNode->getOutDegree() + auxNode->getInDegree())) && auxEdge != nullptr)
-        { //adiciona todos os n�s visihos n�o visitados
+        {
+            //adiciona todos os n�s visihos n�o visitados
             if (*(visitados + auxEdge->getTargetId()) == false)
             {
                 *(visitados + auxEdge->getTargetId()) = true;
@@ -447,9 +449,9 @@ float Graph::floydMarshall(int idSource, int idTarget, ofstream &output_file)
 
     while (s!=e)
     {
-       vet[cont] = s + 1;
-       s = matR[s][e];
-       cont++;
+        vet[cont] = s + 1;
+        s = matR[s][e];
+        cont++;
     }
     vet[cont]=e + 1;
 
@@ -568,11 +570,13 @@ void Graph::topologicalSorting(Graph *graph)
     stack<int> pilhaTopologica; //pilha que armazena a ordem
     int tamGrafo = graph->getOrder() + 1;
     vector<bool> nosVisitados(tamGrafo, false); // vetor que informa se o vertice ja foi visitado inicializa todas
-                                                // as posicoes como false
+    // as posicoes como false
 
     // varredura de todos os vertices, e caso ele nao tenha sido visitado, chama a funcao auxiliar para iniciar a recursao
-    for (int i = 0; i < tamGrafo; i++){
-        if (nosVisitados[i] == false){
+    for (int i = 0; i < tamGrafo; i++)
+    {
+        if (nosVisitados[i] == false)
+        {
             auxTopologicalSorting(i, nosVisitados, pilhaTopologica);
         }
     }
@@ -581,12 +585,15 @@ void Graph::topologicalSorting(Graph *graph)
          << "< ";
 
     // estrutura responsavel por imprimir a ordem topologica
-    while (pilhaTopologica.empty() == false && pilhaTopologica.top() != 0){
-        if (pilhaTopologica.size() > 2){
+    while (pilhaTopologica.empty() == false && pilhaTopologica.top() != 0)
+    {
+        if (pilhaTopologica.size() > 2)
+        {
             cout << pilhaTopologica.top() << ", ";
             pilhaTopologica.pop();
         }
-        else{
+        else
+        {
             cout << pilhaTopologica.top() << " ";
             pilhaTopologica.pop();
         }
@@ -602,10 +609,12 @@ void Graph::auxTopologicalSorting(int index, vector<bool> &nosVisitados, stack<i
 
     // busco todos os vertices adjacentes ao index
     list<int>::iterator i;
-    for (i = adjacencia[index].begin(); i != adjacencia[index].end(); ++i){
+    for (i = adjacencia[index].begin(); i != adjacencia[index].end(); ++i)
+    {
         // verifico se o vertice ja foi visitado e chama a recursao novamente em caso negativo
-        if (!nosVisitados[*i]){
-            auxTopologicalSorting(*i, nosVisitados, pilhaTopologica); 
+        if (!nosVisitados[*i])
+        {
+            auxTopologicalSorting(*i, nosVisitados, pilhaTopologica);
         }
     }
 
@@ -619,7 +628,7 @@ void breadthFirstSearch(ofstream &output_file)
 Graph *Graph::getVertexInduced(bool *vertices, int x, ofstream &output_file)
 {
     vector <Edge> arestas;
-    Graph *g1 = new Graph(x ,this->getDirected(), this->getWeightedEdge(), this->getWeightedNode());
+    Graph *g1 = new Graph(x,this->getDirected(), this->getWeightedEdge(), this->getWeightedNode());
     Node *node = this->getFirstNode();
     Edge *edge;
 
@@ -722,7 +731,8 @@ Graph *Graph::agmKuskal(Graph *graph, ofstream &output_file)
     cout << endl;
 
     output_file << "strict graph kruskal{" << endl;
-    for (int i = 0; i < size_tree; i++){
+    for (int i = 0; i < size_tree; i++)
+    {
         output_file << "\t" << tree[i].getOriginId() << " -- " << tree[i].getTargetId() << ";" << endl;
     }
     output_file << "}";
@@ -730,66 +740,83 @@ Graph *Graph::agmKuskal(Graph *graph, ofstream &output_file)
 }
 Graph *Graph::agmPrim()
 {
-    int tam = this->getOrder(); //armazena n�mero de v�rtices.
-    int prox[tam];              //armazena o id do v�rtice mais pr�ximo que ainda n�o foi inserido na solu��o
-    Graph *tree = new Graph(this->getOrder(), this->getDirected(), this->getWeightedEdge(), this->getWeightedNode());
-    vector<Edge> custo; //armazena os menores custos de arestas incidentes na solu��o.
-    vector<Node *> nos(tam);
-    Node *auxNode = this->getFirstNode();
-    int primeiro = auxNode->getId();
-    Edge *auxEdge;
-    for (int i = 0; i < tam; i++)
-    { //Inicia o vetor de custo com valores m�ximos e preenche o vetor prox.
-        prox[i] = primeiro;
-        custo.push_back(Edge(i, primeiro, INT_MAX));
-        nos[auxNode->getId()] = auxNode;
-        tree->insertNode(auxNode->getId());
-        auxNode = auxNode->getNextNode();
-    }
-    int i, j, k = 0;
-    j = (primeiro);
-    while (k < tam)
+    if(!this->getDirected())
     {
-        prox[j] = -1; //atualiza prox.
-        auxNode = nos[j];
-        auxEdge = auxNode->getFirstEdge();
-        int cont = 0;
-        while ((cont < (auxNode->getOutDegree() + auxNode->getInDegree())) && auxEdge != nullptr)
+        int tam = this->getOrder(); //armazena n�mero de v�rtices.
+        int prox[tam];              //armazena o id do v�rtice mais pr�ximo que ainda n�o foi inserido na solu��o
+        Graph *tree = new Graph(this->getOrder(), this->getDirected(), this->getWeightedEdge(), this->getWeightedNode());
+        vector<Edge> custo; //armazena os menores custos de arestas incidentes na solu��o.
+        vector<Node *> nos(tam);
+        Node *auxNode = this->getFirstNode();
+        int primeiro = auxNode->getId();
+        Edge *auxEdge;
+        for (int i = 0; i < tam; i++)
         {
-            if (prox[auxEdge->getTargetId()] != -1 && (custo[auxEdge->getTargetId()].getWeight() > auxEdge->getWeight()))
-            {
-                custo[auxEdge->getTargetId()] = Edge(auxNode->getId(), auxEdge->getTargetId(), auxEdge->getWeight());
-                prox[auxEdge->getTargetId()] = auxNode->getId();
-            }
-            auxEdge = auxEdge->getNextEdge();
-            cont++;
+            //Inicia o vetor de custo com valores m�ximos e preenche o vetor prox.
+            prox[i] = primeiro;
+            custo.push_back(Edge(i, primeiro, INT_MAX));
+            nos[auxNode->getId()] = auxNode;
+            tree->insertNode(auxNode->getId());
+            auxNode = auxNode->getNextNode();
         }
-        //encontra a aresta j que n�o faz parte da solu��o e tem o menor peso.
-        for (i = 0; i < tam; i++)
-            if (prox[i] != -1)
+        int i, j, k = 0;
+        j = (primeiro);
+        while (k < tam)
+        {
+            prox[j] = -1; //atualiza prox.
+            auxNode = nos[j];
+            auxEdge = auxNode->getFirstEdge();
+            int cont = 0;
+            while ((cont < (auxNode->getOutDegree() + auxNode->getInDegree())) && auxEdge != nullptr)
             {
-                j = i;
-                break;
+                if (prox[auxEdge->getTargetId()] != -1 && (custo[auxEdge->getTargetId()].getWeight() > auxEdge->getWeight()))
+                {
+                    custo[auxEdge->getTargetId()] = Edge(auxNode->getId(), auxEdge->getTargetId(), auxEdge->getWeight());
+                    prox[auxEdge->getTargetId()] = auxNode->getId();
+                }
+                auxEdge = auxEdge->getNextEdge();
+                cont++;
             }
-        for (; i < tam; i++)
-            if (prox[i] != -1 && custo[i].getWeight() < custo[j].getWeight())
-                j = i;
-        k++;
+            //encontra a aresta j que n�o faz parte da solu��o e tem o menor peso.
+            for (i = 0; i < tam; i++)
+                if (prox[i] != -1)
+                {
+                    j = i;
+                    break;
+                }
+            for (; i < tam; i++)
+                if (prox[i] != -1 && custo[i].getWeight() < custo[j].getWeight())
+                    j = i;
+            if(custo[j].getWeight() == INT_MAX)
+            {
+                cout << "Arvore Geradora Minima usando algoritmo de Prim" << endl << endl;
+                cout << "Grafo desconexo" << endl << endl;
+                return nullptr;
+            }
+            k++;
+        }
+        sort(custo.begin(), custo.end());
+        cout << "Arvore Geradora Minima usando algoritmo de Prim" << endl
+             << endl;
+        float weightResult = 0;
+        for (int i = 0; i < tam - 1; i++)
+        {
+            //Imprime a solu��o
+            cout << "(" << custo[i].getOriginId() << ", " << custo[i].getTargetId() << ") - peso = " << custo[i].getWeight() << endl;
+            weightResult += custo[i].getWeight();
+            tree->insertEdge(custo[i].getOriginId(), custo[i].getTargetId(), custo[i].getWeight());
+        }
+        cout << endl
+             << "Peso total da arvore: " << weightResult << endl
+             << endl;
+        return tree;
     }
-    sort(custo.begin(), custo.end());
-    cout << "Arvore Geradora Minima usando algoritmo de Prim" << endl
-         << endl;
-    float weightResult = 0;
-    for (int i = 0; i < tam - 1; i++)
-    { //Imprime a solu��o
-        cout << "(" << custo[i].getOriginId() << ", " << custo[i].getTargetId() << ") - peso = " << custo[i].getWeight() << endl;
-        weightResult += custo[i].getWeight();
-        tree->insertEdge(custo[i].getOriginId(), custo[i].getTargetId(), custo[i].getWeight());
+    else
+    {
+        cout << "Arvore Geradora Minima usando algoritmo de Prim" << endl << endl;
+        cout << "Grafo direcionado" << endl << endl;
+        return nullptr;
     }
-    cout << endl
-         << "Peso total da arvore: " << weightResult << endl
-         << endl;
-    return tree;
 }
 
 void addEdges(vector<Edge *> *vet, Node *sourceNode, Graph *g, bool visitedClusters[])
