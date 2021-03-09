@@ -9,6 +9,7 @@
 #include <chrono>
 #include "Graph.h"
 #include "Node.h"
+#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -262,7 +263,7 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
     {
         bool *vertices = new bool[graph->getOrder()];
 
-        for(int i = 0; i < graph->getOrder(); i++)
+        for (int i = 0; i < graph->getOrder(); i++)
         {
             vertices[i] = false;
         }
@@ -272,7 +273,7 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
 
         int nos;
         cout << "digite os vertices que fazem parte desse grafo induzido: " << endl;
-        for(int j = 0; j < x; j++)
+        for (int j = 0; j < x; j++)
         {
             cin >> nos;
             vertices[nos] = true;
@@ -339,12 +340,34 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
     };
     case 8:
     {
-        escrita(graph->greed(), output_file);
+        time_t start, end;
+        Graph *g;
+
+        time(&start);
+        g = graph->greed();
+        time(&end);
+
+        double time_taken = double(end - start);
+        cout << "Execution time : " << fixed
+             << time_taken << setprecision(3);
+        cout << " sec " << endl;
+        escrita(g, output_file);
         break;
     }
     case 9:
     {
-        escrita(graph->greedRandom(), output_file);
+        time_t start, end;
+        Graph *g;
+
+        time(&start);
+        g = graph->greedRandom();
+        time(&end);
+
+        double time_taken = double(end - start);
+        cout << "Execution time : " << fixed
+             << time_taken << setprecision(3);
+        cout << " sec " << endl;
+        escrita(g, output_file);
         break;
     }
     case 0:
@@ -423,7 +446,7 @@ int main(int argc, char const *argv[])
         }
     }
     else
-        cout << "Unable to open " << argv[1];
+        cout << "Unable to open " << argv[1] << endl;
 
     mainMenu(output_file, graph);
 
