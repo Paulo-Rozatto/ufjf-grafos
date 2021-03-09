@@ -565,14 +565,13 @@ float Graph::dijkstra(int idSource, int idTarget, ofstream &output_file)
 //function that prints a topological sorting
 void Graph::topologicalSorting(Graph *graph)
 {
-    stack<int> pilhaTopologica;
+    stack<int> pilhaTopologica; //pilha que armazena a ordem
     int tamGrafo = graph->getOrder() + 1;
-    vector<bool> nosVisitados(tamGrafo, false);
+    vector<bool> nosVisitados(tamGrafo, false); // vetor que informa se o vertice ja foi visitado inicializa todas
+                                                // as posicoes como false
 
-    for (int i = 0; i < tamGrafo; i++)
-    {
-        if (nosVisitados[i] == false)
-        {
+    for (int i = 0; i < tamGrafo; i++){
+        if (nosVisitados[i] == false){
             auxTopologicalSorting(i, nosVisitados, pilhaTopologica);
         }
     }
@@ -580,15 +579,13 @@ void Graph::topologicalSorting(Graph *graph)
     cout << "\nOrdenacao topologica:" << endl
          << "< ";
 
-    while (pilhaTopologica.empty() == false && pilhaTopologica.top() != 0)
-    {
-        if (pilhaTopologica.size() > 2)
-        {
+    // estrutura responsavel por imprimir a ordem topologica
+    while (pilhaTopologica.empty() == false && pilhaTopologica.top() != 0){
+        if (pilhaTopologica.size() > 2){
             cout << pilhaTopologica.top() << ", ";
             pilhaTopologica.pop();
         }
-        else
-        {
+        else{
             cout << pilhaTopologica.top() << " ";
             pilhaTopologica.pop();
         }
@@ -597,22 +594,20 @@ void Graph::topologicalSorting(Graph *graph)
          << endl;
 }
 
-//fun��o recursiva auxiliar a topologicalSort
+//funcao recursiva auxiliar a topologicalSort
 void Graph::auxTopologicalSorting(int index, vector<bool> &nosVisitados, stack<int> &pilhaTopologica)
 {
-    nosVisitados[index] = true;
+    nosVisitados[index] = true; // marco o vertice da vez como visitado
 
     // busco todos os vertices adjacentes ao index
     list<int>::iterator i;
-    for (i = adjacencia[index].begin(); i != adjacencia[index].end(); ++i)
-    {
-        if (!nosVisitados[*i])
-        {
+    for (i = adjacencia[index].begin(); i != adjacencia[index].end(); ++i){
+        if (!nosVisitados[*i]){
             auxTopologicalSorting(*i, nosVisitados, pilhaTopologica);
         }
     }
 
-    pilhaTopologica.push(index);
+    pilhaTopologica.push(index); //
 }
 
 void breadthFirstSearch(ofstream &output_file)
@@ -663,25 +658,25 @@ Graph *Graph::getVertexInduced(bool *vertices, int x, ofstream &output_file)
     return g1;
 }
 
-/// As fun��es "searchForSubset" e "join" tendem a detectar os ciclos em grafos N�O direcionados. Condi��o fundamental
-/// na montagem do algoritmo de Kruskal.
-//essa fun��o busca o subconjunto (subset) do n� "i" de forma recursiva.
+// As funcoes "searchForSubset" e "join" tendem a detectar os ciclos em grafos NAO direcionados. Condicao fundamental
+// na montagem do algoritmo de Kruskal.
+//essa funcao busca o subconjunto (subset) do no "i" de forma recursiva.
 int searchForSubset(int subset[], int i)
 {
     if (subset[i] == -1)
         return i;
     return searchForSubset(subset, subset[i]);
 }
-//a fun��o de "join" � unir dois "subsets" (subconjuntos) em 1 �nico subconjunto.
+//a funcao de "join" e unir dois "subsets" (subconjuntos) em 1 unico subconjunto.
 void join(int subset[], int v1, int v2)
 {
     int v1_set = searchForSubset(subset, v1);
     int v2_set = searchForSubset(subset, v2);
     subset[v1_set] = v2_set;
 }
-Graph *Graph::agmKuskal(Graph *graph)
+Graph *Graph::agmKuskal(Graph *graph, ofstream &output_file)
 {
-    vector<Edge> tree; //vetor para armazenar a solu��o do problema
+    vector<Edge> tree; //vetor para armazenar a solucao do problema
 
     int size_edges = edges.size();
 
@@ -691,7 +686,7 @@ Graph *Graph::agmKuskal(Graph *graph)
     int V = graph->getOrder();
     int *subset = new int[V + 1];
 
-    //  juntamos todos os subconjuntos em um conjunto pr�prio. Ex: S={A, B, C, D, E}.
+    //  juntamos todos os subconjuntos em um conjunto proprio. Ex: S={A, B, C, D, E}.
     memset(subset, -1, sizeof(int) * V);
 
     for (int i = 0; i < size_edges; i++)
@@ -699,7 +694,7 @@ Graph *Graph::agmKuskal(Graph *graph)
         int v1 = searchForSubset(subset, edges[i].getOriginId());
         int v2 = searchForSubset(subset, edges[i].getTargetId());
 
-        // se forem diferentes, sabemos que n�o forma ciclo, portanto, inserimos no vetor "tree".
+        // se forem diferentes, sabemos que nao forma ciclo, portanto, inserimos no vetor "tree".
         if (v1 != v2)
         {
             tree.push_back(edges[i]);
@@ -709,7 +704,7 @@ Graph *Graph::agmKuskal(Graph *graph)
 
     int size_tree = tree.size();
 
-    // tem a fun��o de mostrar as arestas selecionadas e seus respectivos pesos, no final, tem-se o custo total.
+    // tem a funcao de mostrar as arestas selecionadas e seus respectivos pesos, no final, tem-se o custo total.
     cout << endl;
     cout << "Arvore Geradora Minima usando algoritmo de Kruskal" << endl;
     float weightResult = 0;
@@ -723,6 +718,13 @@ Graph *Graph::agmKuskal(Graph *graph)
     }
     cout << "Peso total do arvore: " << weightResult << endl;
     cout << endl;
+
+    output_file << "strict graph kruskal{" << endl;
+    for (int i = 0; i < size_tree; i++){
+        output_file << "\t" << tree[i].getOriginId() << " -- " << tree[i].getTargetId() << ";" << endl;
+    }
+    output_file << "}";
+
 }
 Graph *Graph::agmPrim()
 {
